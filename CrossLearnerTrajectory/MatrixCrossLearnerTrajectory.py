@@ -23,6 +23,8 @@ pay_off_tensor = np.array([             # The pay-off matrix
 
 
 ## Set up the game
+# Normalize the pay-off tensor (needed for cross learning)
+pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
     "Battle Of The Sexes",
@@ -57,15 +59,17 @@ num_actions = env.action_spec()["num_actions"]
 
 
 ## Set up the players: Cross-learning agents
-# Normalize the pay-off tensor (needed for cross learning)
-pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 print(pay_off_tensor)
-agents = [CrossLearner(
-    #player_id=idx,
+'''agents = [CrossLearner(
     num_actions,
+    idx,
+    None,
     True,
     .001
-) for idx in range(num_players)]
+) for idx in range(num_players)]'''
+agents = [CrossLearner(num_actions, player_id = 0, probs = [.15,.85], delta=.001),
+          CrossLearner(num_actions, player_id = 0, probs = [.2,.8], delta=.001)]
+
 # TODO delete statement:
 print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
@@ -81,20 +85,21 @@ for cur_episode in range(num_train_episodes):
     # As long as the game has not finished, do:
     while not time_step.last():
         # Each agent should choose an action and learn from the state it is in (time_step)
-        actions = [agents[player_id].generateAction() for player_id in range(num_players)]
+        agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
         # Do the chosen actions and get the new state.
-        time_step = env.step(actions)
+        time_step = env.step([x.action for x in agent_output])
+        # TODO delete statement:
+        # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
 
     # Episode is done
     # Let each player learn from the outcome of the episode.
-    for player_id in range(num_players):
-        rewards = time_step.rewards
-        agents[player_id].updateProbs(actions[player_id], rewards[player_id])
-        #print("The chosen actions are {}, and the rewards are {}".format(actions, rewards))
+    for agent in agents:
+        agent.step(time_step)
+        
+    # TODO delete statement:
+    # print("New probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
         
     probabilities[:,cur_episode + 1] = [agent.getProbs(0) for agent in agents]
-    # TODO delete statement:
-    #print("The probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
 
 
