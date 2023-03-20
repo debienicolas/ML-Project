@@ -14,17 +14,15 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(5*1e4)        # Number of episodes for training the players. (for learning)
-pay_off_tensor = np.array([
-    [[3,0],  # Player 1
-     [5,1]],  
-    [[3,5],  # Player 2
-     [0,1]]])
+num_train_episodes = int(5*1e4)         # Number of episodes for training the players. (for learning)
+pay_off_tensor = np.array([             # The pay-off matrix
+    [[-1,1],  # Player 1
+     [1,-1]],  
+    [[-1,1],  # Player 2
+     [1,-1]]])
 
 
 ## Set up the game
-pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
-print(pay_off_tensor)
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
     "Battle Of The Sexes",
@@ -58,7 +56,10 @@ num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
 
 
-## Set up the players: Qepsilon-greedy Q-learners
+## Set up the players: Cross-learning agents
+# Normalize the pay-off tensor (needed for cross learning)
+pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
+print(pay_off_tensor)
 agents = [CrossLearner(
     #player_id=idx,
     num_actions,
@@ -68,6 +69,7 @@ agents = [CrossLearner(
 # TODO delete statement:
 print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
+## Store the probabilities of each episode (needed for the trajectory plot)
 probabilities = np.zeros((num_players, num_train_episodes+1))
 probabilities[:,0] = [agent.getProbs(0) for agent in agents]
 
