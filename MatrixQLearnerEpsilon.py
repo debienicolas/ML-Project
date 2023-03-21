@@ -62,6 +62,8 @@ agents = [tabular_qlearner.QLearner(
     num_actions=num_actions,
     epsilon_schedule=epsilon_schedule
 ) for idx in range(num_players)]
+# TODO delete statement:
+print("Initial Q values for players are: {} and {}.".format(agents[0]._q_values['[0.0]'].values(), agents[1]._q_values['[0.0]'].values()))
 
 
 
@@ -114,7 +116,7 @@ for cur_episode in range(num_train_episodes):
     # As long as the game has not finished, do:
     while not time_step.last():
         # Each agent should choose an action and learn from the state it is in (time_step)
-        agent_output = [agents[player_id].step(time_step, is_evaluation=True) for player_id in range(num_players)]
+        agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
         # Do the chosen actions and get the new state.
         time_step = env.step([x.action for x in agent_output])
 
@@ -122,6 +124,9 @@ for cur_episode in range(num_train_episodes):
     # Let each player learn from the outcome of the episode.
     for agent in agents:
         agent.step(time_step)
+        
+    # TODO delete statement:
+    print("New Q values for players are: {} and {}.".format(agents[0]._q_values['[0.0]'].values(), agents[1]._q_values['[0.0]'].values()))
 
 
 
