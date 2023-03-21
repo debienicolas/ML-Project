@@ -7,6 +7,8 @@ import numpy as np
 from open_spiel.python.algorithms import tabular_qlearner
 from open_spiel.python import rl_tools
 from open_spiel.python import rl_environment
+from open_spiel.python.policy import EpsilonGreedyPolicy
+
 
 
 
@@ -15,7 +17,6 @@ num_train_episodes = int(20)        # Number of episodes for training the player
 num_eval_episodes = int(1000)       # Number of games to play for calculating the mean utility of a specific player. (for evaluation)
 eval_freq = int(1)                  # How frequent (the number of training episodes) an evaluation of the players has to occur.
 epsilon_schedule = .1               # The epsilon for the epsilon-greedy step.
-
 
 
 ## Set up the game
