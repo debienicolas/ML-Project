@@ -43,7 +43,7 @@ class CrossLearner:
         self._normalizeProbs() # normalize the probabilities
         
 
-    def getProbs(self, action: None|int= None) -> float:
+    def getProbs(self, action=None) -> float:
         '''
         Return the probabilities.
         If an action is given as a parameter, then the probability for that action is returned.

@@ -7,7 +7,6 @@ import numpy as np
 from open_spiel.python.algorithms import tabular_qlearner
 from open_spiel.python import rl_tools
 from open_spiel.python import rl_environment
-from open_spiel.python.policy import EpsilonGreedyPolicy
 
 
 
@@ -48,7 +47,7 @@ game = pyspiel.MatrixGame(
 
 
 ##  Set up the correct format for the epsilon.
-epsilon_schedule = rl_tools.ConstantSchedule(float(epsilon_schedule))
+epsilon_schedule = rl_tools.LinearSchedule(0.1,0,num_eval_episodes)
 
 
 ## Set up the environment (cfr a state of the game, but more elaborate)
