@@ -67,8 +67,8 @@ print(pay_off_tensor)
     True,
     .001
 ) for idx in range(num_players)]'''
-agents = [CrossLearner(num_actions, player_id = 0, probs = [.15,.85], delta=.001),
-          CrossLearner(num_actions, player_id = 0, probs = [.2,.8], delta=.001)]
+agents = [CrossLearner(num_actions, player_id = 0, probs = [.15,.85], delta=.0001),
+          CrossLearner(num_actions, player_id = 1, probs = [.2,.8], delta=.0001)]
 
 # TODO delete statement:
 print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
