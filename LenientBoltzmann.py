@@ -1,30 +1,25 @@
-## Based on:     print("The utilities for the players after their first game (before learning) are: {}".format(time_step.rewards))
-
-
-## Import all necessary modules
-import pyspiel
 import numpy as np
+import pyspiel
+from open_spiel.python.algorithms import boltzmann_tabular_qlearner
 from open_spiel.python import rl_environment
-from CrossLearner import CrossLearner
 import open_spiel.python.egt.visualization
 import open_spiel.python.egt.dynamics as dynamics
 import open_spiel.python.egt.utils as utils
+from open_spiel.python import rl_tools
 import matplotlib.pyplot as plt
 import numpy as np
+import collections
+
 
 
 ## Set up the parameters
-num_train_episodes = int(5*1e5)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(100)         # Number of episodes for training the players. (for learning)
 pay_off_tensor = np.array([             # The pay-off matrix
     [[-1,1],  # Player 1
      [1,-1]],  
     [[-1,1],  # Player 2
      [1,-1]]])
 
-
-## Set up the game
-# Normalize the pay-off tensor (needed for cross learning)
-pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
     "Battle Of The Sexes",
@@ -51,60 +46,71 @@ game = pyspiel.MatrixGame(
     list(pay_off_tensor)[1]  # col player utilities
 )
 
-
 ## Set up the environment (cfr a state of the game, but more elaborate)
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
+temperature_schedule = rl_tools.LinearSchedule(0.3, 0.01, num_train_episodes)
+
+agents = [boltzmann_tabular_qlearner.BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.001)
+          for idx in range(num_players)]
 
 
-## Set up the players: Cross-learning agents
-print(pay_off_tensor)
-'''agents = [CrossLearner(
-    num_actions,
-    idx,
-    None,
-    True,
-    .001
-) for idx in range(num_players)]'''
-agents = [CrossLearner(num_actions, player_id = 0, probs = [.15,.85], delta=.0001),
-          CrossLearner(num_actions, player_id = 1, probs = [.2,.8], delta=.0001)]
+# different Q values 
+# for i in range(num_players):
+#     agents[i]._q_values = collections.defaultdict()
 
-# TODO delete statement:
-print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
-## Store the probabilities of each episode (needed for the trajectory plot)
-probabilities = np.zeros((num_players, num_train_episodes+1))
-probabilities[:,0] = [agent.getProbs(0) for agent in agents]
+kappa = 10
+cache = np.empty((num_players,kappa,2),dtype=np.int8)
+index = 0
+probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
+
 
 ## Train the agents
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
+    is_evaluation = True
+    print(index)
     # Get the initial state of the game.
     time_step = env.reset()
     # As long as the game has not finished, do:
-    while not time_step.last():
+    if index % kappa == 0 and cur_episode != 0:
+        is_evaluation = False
+    while not time_step.last() and is_evaluation:
         # Each agent should choose an action and learn from the state it is in (time_step)
-        agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
+        agent_output = [agents[player_id].step(time_step, is_evaluation=is_evaluation) for player_id in range(num_players)]
+        
         # Do the chosen actions and get the new state.
+
         time_step = env.step([x.action for x in agent_output])
+        if is_evaluation:
+            for player_id in range(num_players):
+                cache[player_id,index] = [agent_output[player_id].action , time_step.rewards[player_id]]
         # TODO delete statement:
         # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
-
+    index += 1
     # Episode is done
     # Let each player learn from the outcome of the episode.
-    for agent in agents:
-        agent.step(time_step)
-        
-    # TODO delete statement:
-    # print("New probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
-        
-    probabilities[:,cur_episode + 1] = [agent.getProbs(0) for agent in agents]
+    if not is_evaluation:
+        print(cache)
+        agent_output = []
+        for player_id in range(num_players):
+            agent_chosen_output =  agents[player_id].step(time_step,is_evaluation=True)
+            while agent_chosen_output.action != cache[player_id,np.argmax(cache[player_id,:,1]),0]:
+                time_step = env.reset()
+                agent_chosen_output = agents[player_id].step(time_step,is_evaluation=True)
+            agent_output.append(agent_chosen_output)
+        print([cache[player_id,np.argmax(cache[player_id,:,1]),0] for player_id in range(num_players)])
+        print([agent_output[player_id].action for player_id in range(num_players)])
+        probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
+        time_step = env.step([cache[idx,np.argmax(cache[idx,:,1]),0] for idx in range(num_players)])
 
-
-
-
-
+        for agent in agents:
+            agent.step(time_step)
+        index = 1
+    
+print(probabilities)
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
 
@@ -119,3 +125,4 @@ ax = fig.add_subplot(111,projection="2x2")
 ax.quiver(dyn)
 ax.plot(probabilities[0,:], probabilities[1,:])
 plt.show()
+

@@ -10,12 +10,12 @@ from open_spiel.python import rl_environment
 
 
 
+
 ## Set up the parameters
 num_train_episodes = int(20)        # Number of episodes for training the players. (for learning)
 num_eval_episodes = int(1000)       # Number of games to play for calculating the mean utility of a specific player. (for evaluation)
 eval_freq = int(1)                  # How frequent (the number of training episodes) an evaluation of the players has to occur.
 epsilon_schedule = .1               # The epsilon for the epsilon-greedy step.
-
 
 
 ## Set up the game
@@ -47,7 +47,7 @@ game = pyspiel.MatrixGame(
 
 
 ##  Set up the correct format for the epsilon.
-epsilon_schedule = rl_tools.ConstantSchedule(float(epsilon_schedule))
+epsilon_schedule = rl_tools.LinearSchedule(0.1,0,num_eval_episodes)
 
 
 ## Set up the environment (cfr a state of the game, but more elaborate)
