@@ -15,10 +15,10 @@ import collections
 ## Set up the parameters
 num_train_episodes = int(100)         # Number of episodes for training the players. (for learning)
 pay_off_tensor = np.array([             # The pay-off matrix
-    [[-1,1],  # Player 1
-     [1,-1]],  
-    [[-1,1],  # Player 2
-     [1,-1]]])
+    [[3,0],  # Player 1
+     [0,2]],  
+    [[2,0],  # Player 2
+     [0,3]]])
 
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
@@ -104,7 +104,7 @@ for cur_episode in range(num_train_episodes):
         print([cache[player_id,np.argmax(cache[player_id,:,1]),0] for player_id in range(num_players)])
         print([agent_output[player_id].action for player_id in range(num_players)])
         probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
-        time_step = env.step([cache[idx,np.argmax(cache[idx,:,1]),0] for idx in range(num_players)])
+        time_step = env.step([x.action for x in agent_output])
 
         for agent in agents:
             agent.step(time_step)

@@ -4,18 +4,21 @@
 ## Import all necessary modules
 import pyspiel
 import numpy as np
-from open_spiel.python.algorithms import tabular_qlearner
-from open_spiel.python import rl_tools
 from open_spiel.python import rl_environment
+import open_spiel.python.egt.visualization
+import open_spiel.python.egt.dynamics as dynamics
+import open_spiel.python.egt.utils as utils
+import matplotlib.pyplot as plt
+from open_spiel.python import rl_tools
+from open_spiel.python.algorithms import tabular_qlearner
+import numpy as np
 
 
 
 
 ## Set up the parameters
-num_train_episodes = int(20)        # Number of episodes for training the players. (for learning)
-num_eval_episodes = int(1000)       # Number of games to play for calculating the mean utility of a specific player. (for evaluation)
-eval_freq = int(1)                  # How frequent (the number of training episodes) an evaluation of the players has to occur.
-epsilon_schedule = .1               # The epsilon for the epsilon-greedy step.
+num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
+epsilon_schedule = .1                   # The epsilon for the epsilon-greedy step.
 
 
 ## Set up the game
@@ -47,8 +50,8 @@ game = pyspiel.MatrixGame(
 
 
 ##  Set up the correct format for the epsilon.
-epsilon_schedule = rl_tools.LinearSchedule(0.1,0,num_eval_episodes)
-
+epsilon_schedule = rl_tools.LinearSchedule(0.2,0,num_train_episodes//2)
+epsilon_schedule = rl_tools.ConstantSchedule(0.1)
 
 ## Set up the environment (cfr a state of the game, but more elaborate)
 env = rl_environment.Environment(game)
@@ -59,83 +62,48 @@ num_actions = env.action_spec()["num_actions"]
 agents = [tabular_qlearner.QLearner(
     player_id=idx,
     num_actions=num_actions,
-    epsilon_schedule=epsilon_schedule
+    epsilon_schedule=epsilon_schedule,
+    step_size=0.0001
 ) for idx in range(num_players)]
 # TODO delete statement:
-print("Initial Q values for players are: {} and {}.".format(agents[0]._q_values['[0.0]'].values(), agents[1]._q_values['[0.0]'].values()))
 
 
-
-def eval_agents(env, agents, num_episodes):
-  """
-  Auxiliry function for evaluating agents.
-  This function runs the game a <num_episodes> amount of times    
-  and calculates the rewards of the players after each game.
-  This function outputs the mean of these rewards as a numpy array with the mean reward for each player."""
-  rewards = np.array([0] * env.num_players, dtype=np.float64)
-  for _ in range(num_episodes):
-    time_step = env.reset()
-    while not time_step.last():
-        agent_output = [agents[player_id].step(time_step, is_evaluation=True) for player_id in range(num_players)]
-        time_step = env.step([x.action for x in agent_output])
-    rewards += time_step.rewards
-  rewards /= num_episodes
-  return rewards
-
-
-
-
-
-
-## Run the game when the players have not 'learned' yet.
-# Get the initial state of the game.
-time_step = env.reset() # A time step contains the data of a state of the game.
-# As long as the game has not ended, do:
-while not time_step.last():
-    # Each agent should choose an action and learn from the state it is in (time_step)
-    agent_output = [agents[player_id].step(time_step, is_evaluation=True) for player_id in range(num_players)]
-    # Do the chosen actions and get the new state.
-    time_step = env.step([x.action for x in agent_output])
-print("The utilities for the players after their first game (before learning) are: {}".format(time_step.rewards))
+probabilities = np.zeros((num_players, num_train_episodes))
 
 
 ## Train the agents
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
-    # Evaluate the current players, if an amount of <eval_freq> episodes has passed.
-    if cur_episode%int(eval_freq) == 0:
-        # Get the average rewards for each player after playing an amount of <num_eval_episodes> games.
-        avg_rewards = eval_agents(env, agents, num_eval_episodes)
-        print("Training episodes: {}, Avg rewards: {}".format(
-            cur_episode, avg_rewards
-        ))
-
     # Get the initial state of the game.
     time_step = env.reset()
     # As long as the game has not finished, do:
     while not time_step.last():
         # Each agent should choose an action and learn from the state it is in (time_step)
         agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
+        probabilities[:,cur_episode] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
         # Do the chosen actions and get the new state.
         time_step = env.step([x.action for x in agent_output])
+        # TODO delete statement:
+        # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
 
     # Episode is done
     # Let each player learn from the outcome of the episode.
     for agent in agents:
         agent.step(time_step)
-        
-    # TODO delete statement:
-    print("New Q values for players are: {} and {}.".format(agents[0]._q_values['[0.0]'].values(), agents[1]._q_values['[0.0]'].values()))
+                
+print(probabilities)
 
+## Get the pay-off tensor
+payoff_tensor = utils.game_payoffs_array(game)
 
+## Set up the replicator dynamics
+dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
+  
+## Set up the plot
+fig = plt.figure(figsize = (4,4))
+ax = fig.add_subplot(111,projection="2x2")
 
-## Run the game when the players have 'learned'.
-# Get the initial state of the game.
-time_step = env.reset() 
-# As long as the game has not ended, do:
-while not time_step.last():
-    # Each agent should choose an action and learn from the state it is in (time_step)
-    agent_output = [agents[player_id].step(time_step, is_evaluation=True) for player_id in range(num_players)]
-    # Do the chosen actions and get the new state.
-    time_step = env.step([x.action for x in agent_output])
-print("The utilities for the players after their final game (after learning) are: {}".format(time_step.rewards))
+## Plot the vector field
+ax.quiver(dyn)
+ax.plot(probabilities[0,:], probabilities[1,:])
+plt.show()
