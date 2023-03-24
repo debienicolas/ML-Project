@@ -14,11 +14,22 @@ import collections
 
 ## Set up the parameters
 num_train_episodes = int(100000)         # Number of episodes for training the players. (for learning)
-pay_off_tensor = np.array([            
-    [[-1,-4],  # Player 1
-     [0,-3]],  
-    [[-1,0],  # Player 2
-     [-4,-3]]])
+pay_off_tensor = np.array([             # The pay-off matrix
+    [[0,-5,10],  # Player 1
+     [5,0,-1],
+     [-10,1,0]],
+    [[0,5,-10],  # Player 2
+     [-5,0,1],
+     [10,-1,0]]])    
+
+pay_off_tensor = np.array([             # The pay-off matrix
+    [[0,-.25,.5],  # Player 1
+     [.25,0,-.05],
+     [-.5,.05,0]],
+    [[0,.25,-.5],  # Player 2
+     [-.25,0,.05],
+     [.05,-.05,0]]])     
+
 
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
@@ -40,8 +51,8 @@ game_type = pyspiel.GameType(
 game = pyspiel.MatrixGame(
     game_type,
     {},  # game_parameters
-    ["A","B"],  # row_action_names
-    ["A","B"],  # col_action_names
+    ["R","P","S"],  # row_action_names
+    ["R","P","S"],  # col_action_names
     list(pay_off_tensor)[0],  # row player utilities
     list(pay_off_tensor)[1]  # col player utilities
 )
