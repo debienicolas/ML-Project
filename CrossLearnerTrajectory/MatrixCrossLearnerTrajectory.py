@@ -14,7 +14,7 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(1*1e5)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(1*1e6)         # Number of episodes for training the players. (for learning)
 
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
@@ -34,9 +34,17 @@ pay_off_tensor_dispersion_game= np.array([             # The pay-off matrix
     [[-1,1],  # Player 2
      [1,-1]]])
 
+pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
+    [[0,-5,10],  # Player 1
+     [5,0,-1],
+     [-10,1,0]],
+    [[0,5,-10],  # Player 2
+     [-5,0,1],
+     [10,-1,0]]])            
 
 ## Set up the game
 # Normalize the pay-off tensor (needed for cross learning)
+pay_off_tensor = pay_off_tensor_battle_of_the_sexes
 pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
@@ -55,13 +63,21 @@ game_type = pyspiel.GameType(
     False,  # provides_observation_tensor
     dict()  # parameter_specification
 )
+# game = pyspiel.MatrixGame(
+#     game_type,
+#     {},  # game_parameters
+#     ["R","P","S"],  # row_action_names
+#     ["R","P","S"],  # col_action_names
+#     list(pay_off_tensor)[0],  # row player utilities
+#     list(pay_off_tensor)[1]  # col player utilities
+# )
 game = pyspiel.MatrixGame(
     game_type,
     {},  # game_parameters
     ["A","B"],  # row_action_names
     ["A","B"],  # col_action_names
-    list(pay_off_tensor_prisoners_dilemma)[0],  # row player utilities
-    list(pay_off_tensor_prisoners_dilemma)[1]  # col player utilities
+    list(pay_off_tensor)[0],  # row player utilities
+    list(pay_off_tensor)[1]  # col player utilities
 )
 
 
@@ -91,7 +107,7 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
-ax.set_title("Dispersion Game")
+ax.set_title("Battle of the Sexes")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
 plt.set_cmap("plasma")
@@ -102,8 +118,9 @@ ax.quiver(dyn)
 probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
-probab = [[[0.15,0.85],[0.2,0.8]], [[0.2,0.8],[0.15,0.85]],[[0.85,0.15],[0.8,0.2]],[[0.8,0.2],[0.85,0.15]]]
+probab = [[[0.15,0.85],[0.8,0.2]], [[0.25,0.75],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.8,0.2],[0.15,0.85]]]
 delta = 0.0001
+
 
 for prob in probab:
 
