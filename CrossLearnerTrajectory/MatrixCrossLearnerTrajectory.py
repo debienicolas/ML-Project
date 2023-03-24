@@ -28,7 +28,7 @@ pay_off_tensor_prisoners_dilemma = np.array([
     [[-1,0],  # Player 2
      [-4,-3]]])    
 
-pay_off_tensor = np.array([             # The pay-off matrix
+pay_off_tensor_dispersion_game= np.array([             # The pay-off matrix
     [[-1,1],  # Player 1
      [1,-1]],  
     [[-1,1],  # Player 2
@@ -60,8 +60,8 @@ game = pyspiel.MatrixGame(
     {},  # game_parameters
     ["A","B"],  # row_action_names
     ["A","B"],  # col_action_names
-    list(pay_off_tensor)[0],  # row player utilities
-    list(pay_off_tensor)[1]  # col player utilities
+    list(pay_off_tensor_prisoners_dilemma)[0],  # row player utilities
+    list(pay_off_tensor_prisoners_dilemma)[1]  # col player utilities
 )
 
 

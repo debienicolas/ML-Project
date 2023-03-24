@@ -1,6 +1,6 @@
 import numpy as np
 import pyspiel
-from open_spiel.python.algorithms import boltzmann_tabular_qlearner
+from LenientBoltzmannQLearner import LenientBoltzmannQLearner
 from open_spiel.python import rl_environment
 import open_spiel.python.egt.visualization
 import open_spiel.python.egt.dynamics as dynamics
@@ -13,7 +13,7 @@ import collections
 
 
 ## Set up the parameters
-num_train_episodes = int(100)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
 pay_off_tensor = np.array([             # The pay-off matrix
     [[3,0],  # Player 1
      [0,2]],  
@@ -52,7 +52,7 @@ num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
 temperature_schedule = rl_tools.LinearSchedule(0.3, 0.01, num_train_episodes)
 
-agents = [boltzmann_tabular_qlearner.BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.001)
+agents = [LenientBoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.001)
           for idx in range(num_players)]
 
 
@@ -71,7 +71,7 @@ probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
     is_evaluation = True
-    print(index)
+    #print(index)
     # Get the initial state of the game.
     time_step = env.reset()
     # As long as the game has not finished, do:
@@ -93,16 +93,9 @@ for cur_episode in range(num_train_episodes):
     # Episode is done
     # Let each player learn from the outcome of the episode.
     if not is_evaluation:
-        print(cache)
-        agent_output = []
-        for player_id in range(num_players):
-            agent_chosen_output =  agents[player_id].step(time_step,is_evaluation=True)
-            while agent_chosen_output.action != cache[player_id,np.argmax(cache[player_id,:,1]),0]:
-                time_step = env.reset()
-                agent_chosen_output = agents[player_id].step(time_step,is_evaluation=True)
-            agent_output.append(agent_chosen_output)
-        print([cache[player_id,np.argmax(cache[player_id,:,1]),0] for player_id in range(num_players)])
-        print([agent_output[player_id].action for player_id in range(num_players)])
+        #print(cache)
+        actions = [cache[player_id,np.argmax(cache[player_id,:,1]),0] for player_id in range(num_players)]
+        agent_output =  [agents[player_id].lenient_step(time_step,actions[player_id]) for player_id in range(num_players)]
         probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
         time_step = env.step([x.action for x in agent_output])
 

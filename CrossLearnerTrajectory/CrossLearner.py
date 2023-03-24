@@ -16,7 +16,7 @@ class CrossLearner:
         agent.updateProbs(action, time_step.reward)
     '''
     
-    def __init__(self, numActions: int, player_id = 0, probs = None, randomize: bool = False, delta: float = 1) -> None:
+    def __init__(self, numActions: int = 2, player_id = 0, probs = None, randomize: bool = False, delta: float = 1) -> None:
         '''
         Constructor for this learner.
 
