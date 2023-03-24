@@ -13,12 +13,12 @@ import collections
 
 
 ## Set up the parameters
-num_train_episodes = int(100000)         # Number of episodes for training the players. (for learning)
-pay_off_tensor = np.array([            
-    [[-1,-4],  # Player 1
-     [0,-3]],  
-    [[-1,0],  # Player 2
-     [-4,-3]]])
+num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
+pay_off_tensor = np.array([             # The pay-off matrix
+    [[-1,1],  # Player 1
+     [1,-1]],  
+    [[-1,1],  # Player 2
+     [1,-1]]])
 
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
@@ -50,9 +50,9 @@ game = pyspiel.MatrixGame(
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
-temperature_schedule = rl_tools.LinearSchedule(0.2, 0.001, num_train_episodes)
+temperature_schedule = rl_tools.LinearSchedule(0.3, 0.01, num_train_episodes)
 
-agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.0001)
+agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.001)
           for idx in range(num_players)]
 
 
@@ -64,8 +64,6 @@ agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_s
 kappa = 10
 cache = np.empty((num_players,kappa),dtype=np.int8)
 timesteps = [0]*kappa
-cache = np.empty((num_players,kappa),dtype=np.int8)
-timesteps = [0]*kappa
 probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 
 
@@ -73,17 +71,11 @@ probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
     index = 0
-    index = 0
     is_evaluation = True
     #print(index)
     # Get the initial state of the game.
     time_step = env.reset()
     # As long as the game has not finished, do:
-    
-    # Each agent should choose an action and learn from the state it is in (time_step)
-    agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
-    # Do the chosen actions and get the new state.
-    while (index<kappa):
     
     # Each agent should choose an action and learn from the state it is in (time_step)
     agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
@@ -97,27 +89,13 @@ for cur_episode in range(num_train_episodes):
     # TODO delete statement:
     # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
     
-        timesteps[index] = time_step
-        cache[:,index] = [time_step.rewards[player_id] for player_id in range(num_players)]
-        time_step = env.reset()
-        index += 1
-    # TODO delete statement:
-    # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
-    
     # Episode is done
     # Let each player learn from the outcome of the episode.
     
     #print(cache)
     
     probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
-    
-    #print(cache)
-    
-    probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
 
-    for player_id in range(num_players):
-        time_step = timesteps[np.argmax(cache[player_id,:])]
-        agents[player_id].step(time_step)
     for player_id in range(num_players):
         time_step = timesteps[np.argmax(cache[player_id,:])]
         agents[player_id].step(time_step)
@@ -132,11 +110,8 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
-ax.set_title("Prisoners Dilemma")
-ax.set_xlabel("Player 1")
-ax.set_ylabel("Player 2")
 
 ## Plot the vector field
 ax.quiver(dyn)
-ax.plot(probabilities[0,:], probabilities[1,:],color="blue",linewidth=2)
+ax.plot(probabilities[0,:], probabilities[1,:])
 plt.show()
