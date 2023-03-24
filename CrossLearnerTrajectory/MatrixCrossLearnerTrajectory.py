@@ -15,7 +15,7 @@ import numpy as np
 
 ## Set up the parameters
 num_train_episodes = int(3*1e5)         # Number of episodes for training the players. (for learning)
-
+delta = 0.0001
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
      [0,2]],  
@@ -47,8 +47,8 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
 pay_off_tensor = pay_off_tensor_prisoners_dilemma
 pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
-    "battleOfTheSexes",
-    "Battle Of The Sexes",
+    "MatrixGame",
+    "MatrixGame",
     pyspiel.GameType.Dynamics.SIMULTANEOUS,
     pyspiel.GameType.ChanceMode.DETERMINISTIC,
     pyspiel.GameType.Information.ONE_SHOT,
@@ -63,14 +63,6 @@ game_type = pyspiel.GameType(
     False,  # provides_observation_tensor
     dict()  # parameter_specification
 )
-# game = pyspiel.MatrixGame(
-#     game_type,
-#     {},  # game_parameters
-#     ["R","P","S"],  # row_action_names
-#     ["R","P","S"],  # col_action_names
-#     list(pay_off_tensor)[0],  # row player utilities
-#     list(pay_off_tensor)[1]  # col player utilities
-# )
 game = pyspiel.MatrixGame(
     game_type,
     {},  # game_parameters
@@ -85,18 +77,6 @@ game = pyspiel.MatrixGame(
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
-
-
-## Set up the players: Cross-learning agents
-print(pay_off_tensor)
-'''agents = [CrossLearner(
-    num_actions,
-    idx,
-    None,
-    True,
-    .001
-) for idx in range(num_players)]'''
-
 
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
@@ -120,15 +100,14 @@ probs2 = [0.2,0.8]
 probab = [[[0.85,0.15],[0.85,0.15]], [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
 probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
-delta = 0.0001
 
 
 for prob in probab_prisonDilemma:
 
+    ## Set up the players: Cross-learning agents
     agents = [CrossLearner(num_actions, player_id = 0, probs = prob[0], delta=delta),
             CrossLearner(num_actions, player_id = 1, probs = prob[1], delta=delta)]
 
-    # TODO delete statement:
     print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
     ## Store the probabilities of each episode (needed for the trajectory plot)
@@ -146,16 +125,11 @@ for prob in probab_prisonDilemma:
             agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
             # Do the chosen actions and get the new state.
             time_step = env.step([x.action for x in agent_output])
-            # TODO delete statement:
-            # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
 
         # Episode is done
         # Let each player learn from the outcome of the episode.
         for agent in agents:
             agent.step(time_step)
-            
-        # TODO delete statement:
-        # print("New probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
             
         probabilities[:,cur_episode + 1] = [agent.getProbs(0) for agent in agents]
 

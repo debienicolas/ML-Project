@@ -15,7 +15,7 @@ import numpy as np
 
 ## Set up the parameters
 num_train_episodes = int(1e4)         # Number of episodes for training the players. (for learning)
-
+delta = 0.001
 pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
     [[0,-5,10],  # Player 1
      [5,0,-1],
@@ -61,17 +61,6 @@ num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
 
 
-## Set up the players: Cross-learning agents
-print(pay_off_tensor)
-'''agents = [CrossLearner(
-    num_actions,
-    idx,
-    None,
-    True,
-    .001
-) for idx in range(num_players)]'''
-
-
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
 
@@ -92,15 +81,14 @@ probs2 = [0.2,0.8]
 probab = [[[0.75,0.15,1],[0.75,0.15,1]] ] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
 probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
-delta = 0.001
 
 
 for prob in probab:
 
+    ## Set up the players: Cross-learning agents
     agents = [CrossLearner(num_actions, player_id = 0, probs = prob[0], delta=delta),
             CrossLearner(num_actions, player_id = 1, probs = prob[1], delta=delta)]
 
-    # TODO delete statement:
     print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
 
     ## Store the probabilities of each episode (needed for the trajectory plot)
@@ -126,8 +114,7 @@ for prob in probab:
         for agent in agents:
             agent.step(time_step)
             
-        # TODO delete statement:
-        # print("New probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))
+            
         probabilities[cur_episode + 1,: ]= agents[0].getProbs()
 
     ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)

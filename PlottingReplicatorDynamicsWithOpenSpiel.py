@@ -8,8 +8,8 @@ import numpy as np
 
 ## Set up the game
 game_type = pyspiel.GameType(
-    "battleOfTheSexes",
-    "Battle Of The Sexes",
+    "MatrixGame",
+    "MatrixGame",
     pyspiel.GameType.Dynamics.SIMULTANEOUS,
     pyspiel.GameType.ChanceMode.DETERMINISTIC,
     pyspiel.GameType.Information.ONE_SHOT,

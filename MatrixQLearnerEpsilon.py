@@ -91,9 +91,8 @@ agents = [tabular_qlearner.QLearner(
     epsilon_schedule=epsilon_schedule,
     step_size=0.01
 ) for idx in range(num_players)]
-# TODO delete statement:
 
-
+## A matrix with the probabilities of each episode to plot in the end (the trajectory)
 probabilities = np.zeros((num_players, num_train_episodes))
 
 
@@ -110,8 +109,6 @@ for cur_episode in range(num_train_episodes):
         probabilities[:,cur_episode] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
         # Do the chosen actions and get the new state.
         time_step = env.step([x.action for x in agent_output])
-        # TODO delete statement:
-        # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
 
     # Episode is done
     # Let each player learn from the outcome of the episode.

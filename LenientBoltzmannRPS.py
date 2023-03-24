@@ -13,6 +13,7 @@ import collections
 
 
 ## Set up the parameters
+kappa = 10
 num_train_episodes = int(100000)         # Number of episodes for training the players. (for learning)
 pay_off_tensor = np.array([             # The pay-off matrix
     [[0,-5,10],  # Player 1
@@ -32,8 +33,8 @@ pay_off_tensor = np.array([             # The pay-off matrix
 
 
 game_type = pyspiel.GameType(
-    "battleOfTheSexes",
-    "Battle Of The Sexes",
+    "MatrixGame",
+    "MatrixGame",
     pyspiel.GameType.Dynamics.SIMULTANEOUS,
     pyspiel.GameType.ChanceMode.DETERMINISTIC,
     pyspiel.GameType.Information.ONE_SHOT,
@@ -71,8 +72,7 @@ agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_s
 # for i in range(num_players):
 #     agents[i]._q_values = collections.defaultdict()
 
-
-kappa = 10
+## Set up the buffers for the leniency.
 cache = np.empty((num_players,kappa),dtype=np.int8)
 timesteps = [0]*kappa
 probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
@@ -82,36 +82,34 @@ probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
     index = 0
-    is_evaluation = True
-    #print(index)
+    
     # Get the initial state of the game.
     time_step = env.reset()
-    # As long as the game has not finished, do:
     
-    # Each agent should choose an action and learn from the state it is in (time_step)
+    # Each agent should choose an action 
     agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
-    # Do the chosen actions and get the new state.
+    
+    # Try kappa times to exectute the action in order to find the highest reward.
     while (index<kappa):
         time_step = env.step([x.action for x in agent_output])
         timesteps[index] = time_step
         cache[:,index] = [time_step.rewards[player_id] for player_id in range(num_players)]
         time_step = env.reset()
         index += 1
-    # TODO delete statement:
-    # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
-    
-    # Episode is done
-    # Let each player learn from the outcome of the episode.
-    
-    #print(cache)
-    
+        
+
+    # Add the probabilities of the actions to the tensor in order to plot them in the end.
     probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
 
+    # Let the players learn from the highest reward.
     for player_id in range(num_players):
         time_step = timesteps[np.argmax(cache[player_id,:])]
         agents[player_id].step(time_step)
     
+## The learning is done
+
 print(probabilities)
+
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
 
