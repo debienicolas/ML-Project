@@ -64,6 +64,8 @@ agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_s
 kappa = 10
 cache = np.empty((num_players,kappa),dtype=np.int8)
 timesteps = [0]*kappa
+cache = np.empty((num_players,kappa),dtype=np.int8)
+timesteps = [0]*kappa
 probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 
 
@@ -71,11 +73,17 @@ probabilities = np.zeros((num_players,num_train_episodes//kappa-1))
 # For each episode, do:
 for cur_episode in range(num_train_episodes):
     index = 0
+    index = 0
     is_evaluation = True
     #print(index)
     # Get the initial state of the game.
     time_step = env.reset()
     # As long as the game has not finished, do:
+    
+    # Each agent should choose an action and learn from the state it is in (time_step)
+    agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
+    # Do the chosen actions and get the new state.
+    while (index<kappa):
     
     # Each agent should choose an action and learn from the state it is in (time_step)
     agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
@@ -89,13 +97,27 @@ for cur_episode in range(num_train_episodes):
     # TODO delete statement:
     # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
     
+        timesteps[index] = time_step
+        cache[:,index] = [time_step.rewards[player_id] for player_id in range(num_players)]
+        time_step = env.reset()
+        index += 1
+    # TODO delete statement:
+    # print("Chosen actions and rewards: {} and {}".format([x.action for x in agent_output], time_step.rewards))
+    
     # Episode is done
     # Let each player learn from the outcome of the episode.
     
     #print(cache)
     
     probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
+    
+    #print(cache)
+    
+    probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
 
+    for player_id in range(num_players):
+        time_step = timesteps[np.argmax(cache[player_id,:])]
+        agents[player_id].step(time_step)
     for player_id in range(num_players):
         time_step = timesteps[np.argmax(cache[player_id,:])]
         agents[player_id].step(time_step)
