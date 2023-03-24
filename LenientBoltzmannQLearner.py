@@ -49,7 +49,6 @@ class LenientBoltzmannQLearner(boltzmann_tabular_qlearner.BoltzmannQLearner):
     self._previous_Lenient_action = None
     return result
     
-    
 
   def _get_action_probs(self, info_state, legal_actions, epsilon):
     """Returns a selected action and the probabilities of legal actions."""

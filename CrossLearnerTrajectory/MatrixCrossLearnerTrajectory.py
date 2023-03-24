@@ -14,7 +14,7 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(1*1e6)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(3*1e5)         # Number of episodes for training the players. (for learning)
 
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
@@ -44,7 +44,7 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
 
 ## Set up the game
 # Normalize the pay-off tensor (needed for cross learning)
-pay_off_tensor = pay_off_tensor_battle_of_the_sexes
+pay_off_tensor = pay_off_tensor_prisoners_dilemma
 pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
@@ -107,10 +107,9 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
-ax.set_title("Battle of the Sexes")
+ax.set_title("Prisoners Dilemma")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
-plt.set_cmap("plasma")
 ## Plot the vector field
 ax.quiver(dyn)
 
@@ -118,14 +117,16 @@ ax.quiver(dyn)
 probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
-probab = [[[0.15,0.85],[0.8,0.2]], [[0.25,0.75],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.8,0.2],[0.15,0.85]]]
+probab = [[[0.85,0.15],[0.85,0.15]], [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
+probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
+
 delta = 0.0001
 
 
-for prob in probab:
+for prob in probab_prisonDilemma:
 
     agents = [CrossLearner(num_actions, player_id = 0, probs = prob[0], delta=delta),
-            CrossLearner(num_actions, player_id = 0, probs = prob[1], delta=delta)]
+            CrossLearner(num_actions, player_id = 1, probs = prob[1], delta=delta)]
 
     # TODO delete statement:
     print("Initial probs for players are: {} and {}.".format(agents[0].getProbs(), agents[1].getProbs()))

@@ -20,8 +20,35 @@ import numpy as np
 num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
 epsilon_schedule = .1                   # The epsilon for the epsilon-greedy step.
 
+pay_off_tensor_battle_of_the_sexes = np.array([            
+    [[3,0],  # Player 1
+     [0,2]],  
+    [[2,0],  # Player 2
+     [0,3]]])     
+
+pay_off_tensor_prisoners_dilemma = np.array([            
+    [[-1,-4],  # Player 1
+     [0,-3]],  
+    [[-1,0],  # Player 2
+     [-4,-3]]])    
+
+pay_off_tensor_dispersion_game= np.array([             # The pay-off matrix
+    [[-1,1],  # Player 1
+     [1,-1]],  
+    [[-1,1],  # Player 2
+     [1,-1]]])
+
+pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
+    [[0,-5,10],  # Player 1
+     [5,0,-1],
+     [-10,1,0]],
+    [[0,5,-10],  # Player 2
+     [-5,0,1],
+     [10,-1,0]]])            
+
 
 ## Set up the game
+payoff_tensor = pay_off_tensor_prisoners_dilemma
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
     "Battle Of The Sexes",
@@ -44,14 +71,13 @@ game = pyspiel.MatrixGame(
     {},  # game_parameters
     ["A","B"],  # row_action_names
     ["A","B"],  # col_action_names
-    [[-1,1],[1,-1]],  # row player utilities
-    [[-1,1],[1,-1]]  # col player utilities
+    payoff_tensor[0],  # row player utilities
+    payoff_tensor[1]  # col player utilities
 )
 
 
 ##  Set up the correct format for the epsilon.
-epsilon_schedule = rl_tools.LinearSchedule(0.2,0,num_train_episodes//2)
-epsilon_schedule = rl_tools.ConstantSchedule(0.1)
+epsilon_schedule = rl_tools.LinearSchedule(0.3,0.05,num_train_episodes)
 
 ## Set up the environment (cfr a state of the game, but more elaborate)
 env = rl_environment.Environment(game)
@@ -63,7 +89,7 @@ agents = [tabular_qlearner.QLearner(
     player_id=idx,
     num_actions=num_actions,
     epsilon_schedule=epsilon_schedule,
-    step_size=0.0001
+    step_size=0.01
 ) for idx in range(num_players)]
 # TODO delete statement:
 
@@ -80,6 +106,7 @@ for cur_episode in range(num_train_episodes):
     while not time_step.last():
         # Each agent should choose an action and learn from the state it is in (time_step)
         agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
+        print(agent_output[0])
         probabilities[:,cur_episode] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
         # Do the chosen actions and get the new state.
         time_step = env.step([x.action for x in agent_output])
@@ -102,8 +129,11 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
+ax.set_title("Battle of the sexes")
+ax.set_xlabel("Player 1")
+ax.set_ylabel("Player 2")
 
 ## Plot the vector field
 ax.quiver(dyn)
-ax.plot(probabilities[0,:], probabilities[1,:])
+ax.plot(probabilities[0,:], probabilities[1,:],color="green",alpha=0.5,linewidth=2)
 plt.show()
