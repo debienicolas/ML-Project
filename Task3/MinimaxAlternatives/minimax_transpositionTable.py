@@ -1,8 +1,9 @@
 import pyspiel
 from absl import app
+from auxilaryMethods import *
 import time
 
-def _minimax(state, maximizing_player_id, transpTable: dict):
+def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols):
     """
     Implements a min-max algorithm
 
@@ -16,22 +17,22 @@ def _minimax(state, maximizing_player_id, transpTable: dict):
       The optimal value of the sub-game starting in state
     """
 
-    if (state.dbn_string() in transpTable.keys()):
-        return transpTable[state.dbn_string()]
-
     if state.is_terminal():
         return state.player_return(maximizing_player_id)
+    
+    key = state.dbn_string()+str(getScore(state,num_rows, num_cols))
+    if (key in transpTable.keys()):
+        return transpTable[key]
 
     player = state.current_player()
     if player == maximizing_player_id:
         selection = max
     else:
         selection = min
-    values_children = [_minimax(state.child(action), maximizing_player_id, transpTable) for action in state.legal_actions()]
+    values_children = [_minimax(state.child(action), maximizing_player_id, transpTable, num_rows, num_cols) for action in state.legal_actions()]
 
     result = selection(values_children)
-    transpTable[state.dbn_string()] = result
-
+    transpTable[key] = result
     return result
 
 
@@ -74,17 +75,30 @@ def minimax_search(game,
         state = game.new_initial_state()
     if maximizing_player_id is None:
         maximizing_player_id = state.current_player()
+
+    transpTable=dict()
+    params = game.get_parameters()
+    num_rows = params['num_rows']
+    num_cols = params['num_cols']
+
     v = _minimax(
         state.clone(),
         maximizing_player_id=maximizing_player_id,
-        transpTable=dict())
+        transpTable=transpTable,
+        num_rows= num_rows,
+        num_cols=num_cols)
+    #printTable(transpTable, 1,2)
+
     return v
 
-
 def main(_):
+
+    num_rows = 2
+    num_cols = 2
+
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
-    game_string = "dots_and_boxes(num_rows=1,num_cols=3)"
+    game_string = f"dots_and_boxes(num_rows={num_rows},num_cols={num_cols})"
 
     print("Creating game: {}".format(game_string))
     game = pyspiel.load_game(game_string)
