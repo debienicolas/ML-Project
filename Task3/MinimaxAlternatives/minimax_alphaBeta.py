@@ -40,10 +40,10 @@ def main(_):
 
     end = time.time()
 
-    if value == 0:
+    if value[0] == 0:
         print("It's a draw")
     else:
-        winning_player = 1 if value == 1 else 2
+        winning_player = 1 if value[0] == 1 else 2
         print(f"Player {winning_player} wins.")
 
     print(f"Execution time: {end-start}")
