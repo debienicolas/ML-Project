@@ -1,5 +1,6 @@
 import pyspiel
 from open_spiel.python.algorithms.minimax import alpha_beta_search
+import time
 from absl import app
 
 def minimax_search(game,
@@ -28,18 +29,24 @@ def minimax_search(game,
 def main(_):
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
-    game_string = "dots_and_boxes(num_rows=2,num_cols=2)"
+    game_string = "dots_and_boxes(num_rows=1,num_cols=3)"
 
     print("Creating game: {}".format(game_string))
     game = pyspiel.load_game(game_string)
 
+    start = time.time()
+
     value = minimax_search(game)
+
+    end = time.time()
 
     if value == 0:
         print("It's a draw")
     else:
         winning_player = 1 if value == 1 else 2
         print(f"Player {winning_player} wins.")
+
+    print(f"Execution time: {end-start}")
 
 
 if __name__ == "__main__":
