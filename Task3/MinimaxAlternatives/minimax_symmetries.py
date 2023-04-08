@@ -199,6 +199,16 @@ def symmetricalStates(state, nrRows, nrCols):
         state5 = ''.join(rows5)+''.join(columns5)
         res.add(state5)
 
+        # Horizontally mirrored states of the diagonally mirrored states
+        rows6 = rows4[::-1]
+        columns6 = columns4[::-1]
+        state6 = ''.join(rows6)+''.join(columns6)
+        res.add(state6)
+        rows7 = rows5[::-1]
+        columns7 = columns5[::-1]
+        state7 = ''.join(rows7)+''.join(columns7)
+        res.add(state7)
+
 
     return res
 
@@ -208,8 +218,8 @@ def main(_):
     n = 20
     
     # The number of rows and columns of the game board
-    num_rows = 3
-    num_cols = 3
+    num_rows = 2
+    num_cols = 2
 
     # A list with the measured execution times
     res = []
