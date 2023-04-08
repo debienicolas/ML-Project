@@ -28,6 +28,7 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
             return k[len(score)]
     else:
         transpTable[key] = dict()
+        k = transpTable[key] 
 
     player = state.current_player()
     if player == maximizing_player_id:
@@ -38,7 +39,9 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
 
     result = selection(values_children)
     for stateString in symmetricalStates(state.dbn_string(),num_rows, num_cols):
-        k = transpTable[key] 
+        if not (stateString in transpTable.keys()):
+            transpTable[stateString] = dict()
+        k = transpTable[stateString] 
         k[len(score)] = result
     return result
 
