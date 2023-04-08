@@ -208,8 +208,8 @@ def main(_):
     n = 20
     
     # The number of rows and columns of the game board
-    num_rows = 2
-    num_cols = 2
+    num_rows = 3
+    num_cols = 3
 
     # A list with the measured execution times
     res = []
@@ -235,6 +235,7 @@ def main(_):
             print(f"Player {winning_player} wins.")
         
         res.append(end-start)
+        print(end-start)
 
     # Take the average of the different execution times.
     print(f"Execution time: {sum(res)/len(res)}")

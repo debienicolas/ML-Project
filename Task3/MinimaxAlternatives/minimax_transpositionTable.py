@@ -149,6 +149,7 @@ def main(_):
             print(f"Player {winning_player} wins.")
 
         res.append(end-start)
+        print(end-start)
 
     # Take the average of the different execution times.
     print(f"Execution time: {sum(res)/len(res)}")

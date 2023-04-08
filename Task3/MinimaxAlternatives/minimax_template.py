@@ -73,26 +73,40 @@ def minimax_search(game,
 
 
 def main(_):
+    # The number of times to measure the execution time (and averaging afterwards)
+    n = 20
+    
+    # The number of rows and columns of the game board
+    num_rows = 2
+    num_cols = 2
+
+    # A list with the measured execution times
+    res = []
+
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
-    game_string = "dots_and_boxes(num_rows=1,num_cols=3)"
+    game_string = f"dots_and_boxes(num_rows={num_rows},num_cols={num_cols})"
 
     print("Creating game: {}".format(game_string))
     game = pyspiel.load_game(game_string)
 
-    start = time.time()
+    for i in range(n):
+        start = time.time()
 
-    value = minimax_search(game)
+        value = minimax_search(game)
 
-    end = time.time()
+        end = time.time()
 
-    if value == 0:
-        print("It's a draw")
-    else:
-        winning_player = 1 if value == 1 else 2
-        print(f"Player {winning_player} wins.")
-
-    print(f"Execution time: {end-start}")
+        if value == 0:
+            print("It's a draw")
+        else:
+            winning_player = 1 if value == 1 else 2
+            print(f"Player {winning_player} wins.")
+        
+        res.append(end-start)
+        print(end-start)
+    # Take the average of the different execution times.
+    print(f"Execution time: {sum(res)/len(res)}")
 
 
 if __name__ == "__main__":
