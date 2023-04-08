@@ -3,7 +3,7 @@ from absl import app
 from auxilaryMethods import *
 import time
 
-def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols):
+def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols, score = [], action = 0):
     """
     Implements a min-max algorithm
 
@@ -20,19 +20,25 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols)
     if state.is_terminal():
         return state.player_return(maximizing_player_id)
     
-    key = state.dbn_string()+str(getScore(state,num_rows, num_cols))
+    key = state.dbn_string()
+    score = getScore(state,num_rows, num_cols, score, action)
     if (key in transpTable.keys()):
-        return transpTable[key]
+        k = transpTable[key]
+        if (len(score) in k.keys()):
+            return k[len(score)]
+    else:
+        transpTable[key] = dict()
 
     player = state.current_player()
     if player == maximizing_player_id:
         selection = max
     else:
         selection = min
-    values_children = [_minimax(state.child(action), maximizing_player_id, transpTable, num_rows, num_cols) for action in state.legal_actions()]
+    values_children = [_minimax(state.child(action), maximizing_player_id, transpTable, num_rows, num_cols, score, action) for action in state.legal_actions()]
 
     result = selection(values_children)
-    transpTable[key] = result
+    k = transpTable[key]
+    k[len(score)] = result
     return result
 
 
@@ -88,13 +94,14 @@ def minimax_search(game,
         num_rows= num_rows,
         num_cols=num_cols)
     #printTable(transpTable, 1,2)
-
     return v
 
 def main(_):
-
+    n = 20
     num_rows = 2
     num_cols = 2
+
+    res =[]
 
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
@@ -103,19 +110,22 @@ def main(_):
     print("Creating game: {}".format(game_string))
     game = pyspiel.load_game(game_string)
 
-    start = time.time()
+    for i in range(n):
+        start = time.time()
 
-    value = minimax_search(game)
+        value = minimax_search(game)
 
-    end = time.time()
+        end = time.time()
 
-    if value == 0:
-        print("It's a draw")
-    else:
-        winning_player = 1 if value == 1 else 2
-        print(f"Player {winning_player} wins.")
+        if value == 0:
+            print("It's a draw")
+        else:
+            winning_player = 1 if value == 1 else 2
+            print(f"Player {winning_player} wins.")
 
-    print(f"Execution time: {end-start}")
+        res.append(end-start)
+
+    print(f"Execution time: {sum(res)/len(res)}")
 
 
 if __name__ == "__main__":

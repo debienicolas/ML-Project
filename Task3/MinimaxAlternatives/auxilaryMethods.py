@@ -1,3 +1,5 @@
+import pyspiel
+
 def printState(state, nrRows, nrCols):
     game_string = (f"dots_and_boxes(num_rows={nrRows},num_cols={nrCols},"
                 "utility_margin=true)")
@@ -8,8 +10,10 @@ def printState(state, nrRows, nrCols):
 
 def printTable(transpTable,nrRows, nrColumns):
     for key in transpTable.keys():
+        print(key)
         printState(key, nrRows, nrColumns)
-        print(transpTable[key])
+        for score in transpTable[key].keys():
+            print(transpTable[key], score)
 
 def part2num(part):
     p = {'h': 0, 'horizontal': 0,  # Who has set the horizontal line (top of cell)
@@ -42,12 +46,25 @@ def get_observation_state(obs_tensor, row, col, part, num_cols, num_rows , as_st
         is_state = num2state(is_state)
     return is_state
 
+def getCell(action, num_rows, num_cols):
+    action = 10
+    nb_hlines = (num_rows + 1) * num_cols
+    if action < nb_hlines:
+        row = action // num_cols
+        col = action % num_cols
+    else:
+        action2 = action - nb_hlines
+        row = action2 // (num_cols + 1)
+        col = action2 % (num_cols + 1)
+    return [(row-1,col-1), (row-1,col), (row,col-1), (row,col)]
+    
 
-def getScore(state, nrRows, nrCols):
+
+def getScore(state, nrRows, nrCols, score, action):
     obsTensor = state.observation_tensor()
-    score = {'empty':0, 'player1':0, 'player2':0}
-    for i in range(nrRows):
-        for j in range(nrCols):
-            idx = get_observation_state(obsTensor, i,j, 2, nrCols, nrRows)
-            score[idx] = score[idx] + 1
-    return {0: score['player1'], 1: score['player2']}
+    res = score.copy()
+    for (i,j) in getCell(action, nrRows, nrCols):
+        if not ((i,j) in res):
+            if get_observation_state(obsTensor, i,j, 2, nrCols, nrRows, False) == 1:
+                res.append((i,j))
+    return res
