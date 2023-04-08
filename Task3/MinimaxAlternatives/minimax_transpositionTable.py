@@ -12,6 +12,10 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
       maximizing_player_id: The id of the MAX player. The other player is assumed
         to be MIN.
       transpTable: The current transposition table (dictionary) of the game.
+      num_rows: the number of rows of the game board
+      num_cols: the number of columns of the game board
+      score: A list with the cells won by player 1
+      action: The last chosen action
 
     Returns:
       The optimal value of the sub-game starting in state
@@ -20,14 +24,22 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
     if state.is_terminal():
         return state.player_return(maximizing_player_id)
     
+    # The key of the table is the lines that are filled in.
+    # Each value in the table is a dictionary 
+    # with the value of the score as key and the minimax value as value.
     key = state.dbn_string()
-    score = getScore(state,num_rows, num_cols, score, action)
+    # Update the list of scored cells after the last action
+    score = updateScore(state,num_rows, num_cols, score, action)
     if (key in transpTable.keys()):
         k = transpTable[key]
         if (len(score) in k.keys()):
+            # Current state and score already found
             return k[len(score)]
     else:
+        # Current state not found,
+        # so initialise a new dictionary for this state.
         transpTable[key] = dict()
+        k = transpTable[key] 
 
     player = state.current_player()
     if player == maximizing_player_id:
@@ -36,8 +48,8 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
         selection = min
     values_children = [_minimax(state.child(action), maximizing_player_id, transpTable, num_rows, num_cols, score, action) for action in state.legal_actions()]
 
+    # Store the found value.
     result = selection(values_children)
-    k = transpTable[key]
     k[len(score)] = result
     return result
 
@@ -49,6 +61,9 @@ def minimax_search(game,
     """Solves deterministic, 2-players, perfect-information 0-sum game.
 
     For small games only! Please use keyword arguments for optional arguments.
+
+    [[ EXTENSION ]]
+    * Transposition table
 
     Arguments:
       game: The game to analyze, as returned by `load_game`.
@@ -82,7 +97,10 @@ def minimax_search(game,
     if maximizing_player_id is None:
         maximizing_player_id = state.current_player()
 
+    # Initialise the transposition table as a dictionary.
     transpTable=dict()
+
+    # Get the number of rows and columns of the game board.
     params = game.get_parameters()
     num_rows = params['num_rows']
     num_cols = params['num_cols']
@@ -93,14 +111,21 @@ def minimax_search(game,
         transpTable=transpTable,
         num_rows= num_rows,
         num_cols=num_cols)
-    #printTable(transpTable, 1,2)
+    
+    # For debugging:
+    # printTable(transpTable, 1,2)
+
     return v
 
 def main(_):
+    # The number of times to measure the execution time (and averaging afterwards)
     n = 20
+
+    # The number of rows and columns of the game board
     num_rows = 2
     num_cols = 2
 
+    # A list with the measured execution times
     res =[]
 
     games_list = pyspiel.registered_names()
@@ -125,6 +150,7 @@ def main(_):
 
         res.append(end-start)
 
+    # Take the average of the different execution times.
     print(f"Execution time: {sum(res)/len(res)}")
 
 

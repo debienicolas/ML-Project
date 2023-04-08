@@ -12,6 +12,10 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
       maximizing_player_id: The id of the MAX player. The other player is assumed
         to be MIN.
       transpTable: The current transposition table (dictionary) of the game.
+      num_rows: the number of rows of the game board
+      num_cols: the number of columns of the game board
+      score: A list with the cells won by player 1
+      action: The last chosen action
 
     Returns:
       The optimal value of the sub-game starting in state
@@ -20,13 +24,20 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
     if state.is_terminal():
         return state.player_return(maximizing_player_id)
     
+    # The key of the table is the lines that are filled in.
+    # Each value in the table is a dictionary 
+    # with the value of the score as key and the minimax value as value.
     key = state.dbn_string()
-    score = getScore(state,num_rows, num_cols, score, action)
+    # Update the list of scored cells after the last action
+    score = updateScore(state,num_rows, num_cols, score, action)
     if (key in transpTable.keys()):
         k = transpTable[key]
         if (len(score) in k.keys()):
+            # Current state and score already found
             return k[len(score)]
     else:
+        # Current state not found,
+        # so initialise a new dictionary for this state.
         transpTable[key] = dict()
         k = transpTable[key] 
 
@@ -37,6 +48,7 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
         selection = min
     values_children = [_minimax(state.child(action), maximizing_player_id, transpTable, num_rows, num_cols, score, action) for action in state.legal_actions()]
 
+    # Store the found value.
     result = selection(values_children)
     for stateString in symmetricalStates(state.dbn_string(),num_rows, num_cols):
         if not (stateString in transpTable.keys()):
@@ -53,6 +65,10 @@ def minimax_search(game,
     """Solves deterministic, 2-players, perfect-information 0-sum game.
 
     For small games only! Please use keyword arguments for optional arguments.
+
+    [[ EXTENSION ]]
+    * Transposition table
+    * Symmetries
 
     Arguments:
       game: The game to analyze, as returned by `load_game`.
@@ -86,7 +102,10 @@ def minimax_search(game,
     if maximizing_player_id is None:
         maximizing_player_id = state.current_player()
 
+    # Initialise the transposition table as a dictionary.
     transpTable=dict()
+
+    # Get the number of rows and columns of the game board.
     params = game.get_parameters()
     num_rows = params['num_rows']
     num_cols = params['num_cols']
@@ -97,11 +116,41 @@ def minimax_search(game,
         transpTable=transpTable,
         num_rows= num_rows,
         num_cols=num_cols)
-    #printTable(transpTable, num_rows,num_cols)
+    
+    # For debugging:
+    # printTable(transpTable, 1,2)
 
     return v
 
 def symmetricalStates(state, nrRows, nrCols):
+    """
+    Finds the symmetrical states of the given state.
+
+    These symmetrical states include:
+    - the state itself
+    - the horizontally mirrored state
+    - the vertically mirrored state
+    - the vertically and horizontally mirrored state
+    - the diagonally top left - bottom right mirrored state (for squared game boards)
+    - the diagonally bottom left - top right mirrored state (for squared game boards)
+
+    Arguments:
+      state: The state to mirror.
+      nrRows: the number of rows of the game board
+      nrCols: the number of columns of the game board
+
+    Returns:
+      A set with the symmetrical states of the given state (including the given state).
+    """
+
+    # Preprocessing
+    # Divide the given state in groups of lines, according to:
+    #   - rows: each row is a row of horizontal lines on the game board
+    #           -> size: nrRows + 1
+    #           -> each row is a string of length nrCols 
+    #   - columns: each column is a column of vertical lines on the game board
+    #           -> size: nrRows
+    #           -> each column is a string of length nrCols+1
     rows = []
     columns = []
     for i in range(nrRows+1):
@@ -109,23 +158,24 @@ def symmetricalStates(state, nrRows, nrCols):
     for j in range(nrRows):
         columns.append(state[(nrRows+1)*nrCols + j*(nrCols+1):(nrRows+1)*nrCols + (j+1)*(nrCols+1)])
 
+    # The set of mirrored states, including the given state.
     res = set()
     res.add(state)
 
 
-    # Vertical symmetry
+    # Vertically mirrored state
     rows1 = [row[::-1] for row in rows]
     columns1 = [column[::-1] for column in columns]
     state1 = ''.join(rows1)+''.join(columns1)
     res.add(state1)
 
-    # Horizontal symmetry
+    # Horizontally mirrored state
     rows2 = rows[::-1]
     columns2 = columns[::-1]
     state2 = ''.join(rows2)+''.join(columns2)
     res.add(state2)
 
-    # Vertical and Horizontal symmetry
+    # Vertically and horizontally mirrored state
     rows3 = rows1[::-1]
     columns3 = columns1[::-1]
     state3 = ''.join(rows3)+''.join(columns3)
@@ -133,7 +183,7 @@ def symmetricalStates(state, nrRows, nrCols):
 
     # Check if square board
     if (nrRows == nrCols):
-        # Diagonal symmetry (top left - bottom right)
+        # Diagonally mirrored (top left - bottom right)
         rows4 = []
         for j in range(nrRows+1):
             rows4.append(''.join(column[j] for column in columns))
@@ -143,7 +193,7 @@ def symmetricalStates(state, nrRows, nrCols):
         state4 = ''.join(rows4)+''.join(columns4)
         res.add(state4)
 
-        # Diagonal symmetry (bottom left - top right)
+        # Diagonally mirrored (bottom left - top right)
         rows5 = [row[::-1] for row in rows4][::-1]
         columns5 = [column[::-1] for column in columns4][::-1]
         state5 = ''.join(rows5)+''.join(columns5)
@@ -154,10 +204,14 @@ def symmetricalStates(state, nrRows, nrCols):
 
 
 def main(_):
+    # The number of times to measure the execution time (and averaging afterwards)
     n = 20
+    
+    # The number of rows and columns of the game board
     num_rows = 2
     num_cols = 2
 
+    # A list with the measured execution times
     res = []
 
     games_list = pyspiel.registered_names()
@@ -182,6 +236,7 @@ def main(_):
         
         res.append(end-start)
 
+    # Take the average of the different execution times.
     print(f"Execution time: {sum(res)/len(res)}")
 
 
