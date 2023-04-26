@@ -123,7 +123,7 @@ def main(_):
 
     # The number of rows and columns of the game board
     num_rows = 2
-    num_cols = 2
+    num_cols = 3
 
     # A list with the measured execution times
     res =[]
