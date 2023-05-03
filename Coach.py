@@ -12,7 +12,7 @@ from Arena import Arena
 from open_spiel.python.algorithms.mcts import MCTSBot
 from GNNEvaluator import GNNEvaluator
 import Graph
-
+from MCTS import MCTS
 log = logging.getLogger(__name__)
 
 
@@ -60,8 +60,7 @@ class Coach():
             self.curPlayer = state.current_player()
             #print("Current player: ", self.curPlayer)
             #print(state)
-            pi,action= self.mcts.step_with_policy(state)
-            print(pi)
+            pi,action= self.mcts.step_with_policy_training(state)
             #print("Action: ", action)
             #print("Policy: ", pi)
 
@@ -96,7 +95,7 @@ class Coach():
 
                 # Perform selfplay and add the examples trainExamples
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
-                    self.mcts = MCTSBot(
+                    self.mcts = MCTS(
                         self.game,
                         self.args.cpuct,
                         self.args.numMCTSSims,
