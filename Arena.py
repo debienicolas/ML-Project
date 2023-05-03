@@ -32,35 +32,33 @@ class Arena():
         Executes one episode of a game.
 
         Returns:
-            either
-                winner: player who won the game (1 if player1, -1 if player2)
-            or
-                draw result returned from the game that is neither 1, -1, nor 0.
+            The returns for the first player
         """
         players = [self.player2, None, self.player1]
-        curPlayer = 1
-        board = self.game.getInitBoard()
+        state = self.game.new_initial_state()
+        curPlayer = state.current_player()
         it = 0
-        while self.game.getGameEnded(board, curPlayer) == 0:
+        while not state.is_terminal():
             it += 1
             if verbose:
                 assert self.display
                 print("Turn ", str(it), "Player ", str(curPlayer))
-                self.display(board)
-            action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
+                self.display(state)
+            action = players[curPlayer + 1](self.game.getCanonicalForm(state, curPlayer)) # TODO
 
-            valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1)
+            valids = self.game.legal_actions()
 
             if valids[action] == 0:
                 log.error(f'Action {action} is not valid!')
                 log.debug(f'valids = {valids}')
                 assert valids[action] > 0
-            board, curPlayer = self.game.getNextState(board, curPlayer, action)
+            state = state.ApplyAction(action)
+            curPlayer = state.current_player()
         if verbose:
             assert self.display
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
-        return curPlayer * self.game.getGameEnded(board, curPlayer)
+            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(state, 1)))
+            self.display(state)
+        return state.returns()[0]
 
     def playGames(self, num, verbose=False):
         """
