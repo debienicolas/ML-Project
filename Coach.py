@@ -131,6 +131,8 @@ class Coach():
             # train the GNNet on the new examples
             self.nnet.train(trainExamples)
 
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+
             nmcts = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
                         GNNEvaluator(self.game, self.nnet, self.args)) 
 
@@ -155,6 +157,7 @@ class Coach():
         folder = self.args.checkpoint
         if not os.path.exists(folder):
             os.makedirs(folder)
+        # filename = checkpoint/checkpoint_i.pth.tar.examples
         filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
