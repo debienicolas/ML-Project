@@ -34,31 +34,21 @@ class Arena():
         Returns:
             The returns for the first player
         """
-        players = [self.player2, None, self.player1]
+        players = [self.player1,self.player2]
         state = self.game.new_initial_state()
+        # beginning player is 0 (player 1)
         curPlayer = state.current_player()
         it = 0
         while not state.is_terminal():
-            it += 1
-            if verbose:
-                assert self.display
-                print("Turn ", str(it), "Player ", str(curPlayer))
-                self.display(state)
-            action = players[curPlayer + 1](self.game.getCanonicalForm(state, curPlayer)) # TODO
-
-            valids = self.game.legal_actions()
-
-            if valids[action] == 0:
-                log.error(f'Action {action} is not valid!')
-                log.debug(f'valids = {valids}')
-                assert valids[action] > 0
-            state = state.ApplyAction(action)
             curPlayer = state.current_player()
-        if verbose:
-            assert self.display
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(state, 1)))
-            self.display(state)
-        return state.returns()[0]
+            it += 1
+
+            bot = players[curPlayer]
+            action = bot.step(state)
+
+            state.apply_action(action)
+        
+        return state.rewards()
 
     def playGames(self, num, verbose=False):
         """
@@ -76,22 +66,23 @@ class Arena():
         twoWon = 0
         draws = 0
         for _ in tqdm(range(num), desc="Arena.playGames (1)"):
-            gameResult = self.playGame(verbose=verbose)
-            if gameResult == 1:
+            gameRewards = self.playGame(verbose=verbose)
+            if gameRewards == [1.0, -1.0]:
                 oneWon += 1
-            elif gameResult == -1:
+            elif gameRewards== [-1.0, 1.0]:
                 twoWon += 1
             else:
                 draws += 1
-
+        
+        # switch players so player 2 starts
         self.player1, self.player2 = self.player2, self.player1
 
         for _ in tqdm(range(num), desc="Arena.playGames (2)"):
             gameResult = self.playGame(verbose=verbose)
-            if gameResult == -1:
-                oneWon += 1
-            elif gameResult == 1:
+            if gameRewards == [1.0, -1.0]:
                 twoWon += 1
+            elif gameResult == [-1.0, 1.0]:
+                oneWon += 1
             else:
                 draws += 1
 

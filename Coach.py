@@ -117,6 +117,7 @@ class Coach():
 
             # shuffle examples before training
             print("shuffling examples")
+            
             trainExamples = []
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
@@ -129,16 +130,16 @@ class Coach():
                         GNNEvaluator(self.game, self.pnet, self.args)) 
 
             # train the GNNet on the new examples
+            print("Amount of training examples: ", len(trainExamples))
             self.nnet.train(trainExamples)
 
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            #self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
 
             nmcts = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
                         GNNEvaluator(self.game, self.nnet, self.args)) 
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            arena = Arena(pmcts,nmcts, self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
