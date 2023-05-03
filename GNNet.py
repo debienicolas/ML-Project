@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 import Graph
 
 args = dotdict({
-    'lr': 0.001,
+    'lr': 0.00001,
     'dropout': 0.3,
     'epochs': 50,
     'batch_size': 64,
@@ -74,23 +74,40 @@ class GNNetWrapper():
         #         total_loss += loss.item()
         #         print("Epoch: {}, Loss: {:.4f}".format(epoch, total_loss))
 
+        def custom_loss(pi,target_pi,value,target_value):
+            mse_loss = nn.MSELoss()(value,target_value)
+            cross_entropy_loss = nn.CrossEntropyLoss()(pi,target_pi)
+            return mse_loss, cross_entropy_loss
+
         for epoch in range(args.epochs):
             self.nnet.train()
+            total_loss = 0
+            total_value_loss = 0
+            total_policy_loss = 0
             for i in range(len(input_graphs)):
+                # train per example => batch could be better
                 graph = input_graphs[i]
-                print("Graph: ", graph)
-                target_pi = target_pis[i]
-                print("Target pi: ", target_pi, "type: ", type(target_pi))
+                target_pi = torch.tensor(target_pis[i])
                 target_value = torch.tensor(target_values[i])
-                print("Target value: ", target_value,"type ", type(target_value))
+                #print("Graph: ", graph)
+                #print("Target pi: ", target_pi, "\ntype: ", type(target_pi))
+                #print("Target value: ", target_value,"\ntype: ", type(target_value))
+
                 optimizer.zero_grad()
                 pred_pi, pred_value = self.nnet(graph)
-                print("Pred pi: ", len(pred_pi), "target pi: ", len(target_pi))
-                print("Pred value: ", pred_value, "target value: ", target_value)
-                loss = criterion(pred_pi, target_pi) + criterion(pred_value, target_value)
+
+                # print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
+                # print("Pred value: ", pred_value, "\ntarget value: ", target_value)
+                #loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
+                value_loss , policy_loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
+                loss = value_loss + policy_loss
+                #loss = F.nll_loss(pred_pi,target_pi) + F.mse_loss(pred_value,target_value)
                 loss.backward()
                 optimizer.step()
-                print("Epoch: {}, Loss: {:.4f}".format(epoch, loss.item()))
+                total_loss += loss.item()
+                total_value_loss += value_loss.item()
+                total_policy_loss += policy_loss.item()
+            print("Epoch: {}, Total loss: {:.4f}, Total value loss: {:.2f}, Total policy loss: {:.2f},Examples: {}".format(epoch, total_loss,total_value_loss,total_policy_loss,len(input_graphs)))
             
 
 
