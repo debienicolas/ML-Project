@@ -27,8 +27,8 @@ args = dotdict({
     'numItersForTrainExamplesHistory': 20,
 })
 
-num_rows = 2
-num_cols = 2
+num_rows = 4
+num_cols = 4
 game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
 game = pyspiel.load_game(game_string)
 
