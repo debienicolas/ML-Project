@@ -27,8 +27,8 @@ args = dotdict({
     'numItersForTrainExamplesHistory': 20,
 })
 
-num_rows = 10
-num_cols = 10
+num_rows = 2
+num_cols = 2
 game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
 game = pyspiel.load_game(game_string)
 
@@ -63,7 +63,7 @@ arena = Arena.Arena(p1,p2, game)
 
 oneWon, twoWon, draws = 0,0,0
 rewards = [0.0,0.0]
-for i in tqdm(range(10), desc="Playing_games_1"):
+for i in tqdm(range(20), desc="Playing_games_1"):
     reward = arena.playGame()
     if reward[0] == 1.0:
         oneWon += 1
@@ -76,7 +76,7 @@ p2 = UniformRandomBot(0,np.random)
 
 arena = Arena.Arena(p2,p1, game)
 
-for i in tqdm(range(10), desc="Playing_games_2"):
+for i in tqdm(range(20), desc="Playing_games_2"):
     reward = arena.playGame()
     if reward[0] == 1.0:
         twoWon += 1
