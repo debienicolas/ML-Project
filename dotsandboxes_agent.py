@@ -16,7 +16,10 @@ import random
 import numpy as np
 import pyspiel
 from open_spiel.python.algorithms import evaluate_bots
-
+from open_spiel.python.algorithms.mcts import MCTSBot
+from GNNet import GNNetWrapper as gnn
+from utils import dotdict
+from GNNEvaluator import GNNEvaluator
 
 logger = logging.getLogger('be.kuleuven.cs.dtai.dotsandboxes')
 
@@ -44,6 +47,13 @@ class Agent(pyspiel.Bot):
         a few seconds.
         """
         pyspiel.Bot.__init__(self)
+        args = dotdict({'cpuct': 1,
+                        'numMCTSSims': 25,
+                        })
+        game = pyspiel.load_game("dots_and_boxes")
+        n = gnn()
+        n.load_checkpoint("", "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/checkpoint/best.h5")
+        self.bot = MCTSBot(game,args.cpuct,args.numMCTSSims,GNNEvaluator(n,args))
         self.player_id = player_id
 
     def restart_at(self, state):
@@ -70,9 +80,11 @@ class Agent(pyspiel.Bot):
             `pyspiel.INVALID_ACTION` if there are no legal actions available.
         """
         # Plays random action, change with your best strategy
-        legal_actions = state.legal_actions()
-        rand_idx = random.randint(0, len(legal_actions) - 1)
-        action = legal_actions[rand_idx]
+        #legal_actions = state.legal_actions()
+        #rand_idx = random.randint(0, len(legal_actions) - 1)
+        #action = legal_actions[rand_idx]
+        # plays informed action
+        action = self.bot.step(state)
         return action
 
 
@@ -81,14 +93,16 @@ def test_api_calls():
     tournament. It should not trigger any Exceptions.
     """
     dotsandboxes_game_string = (
-        "dotsandboxes(num_rows=5,num_cols=5)")
+        "dots_and_boxes(num_rows=5,num_cols=5)")
     game = pyspiel.load_game(dotsandboxes_game_string)
     bots = [get_agent_for_tournament(player_id) for player_id in [0,1]]
+    print(bots)
     returns = evaluate_bots.evaluate_bots(game.new_initial_state(), bots, np.random)
     assert len(returns) == 2
     assert isinstance(returns[0], float)
     assert isinstance(returns[1], float)
     print("SUCCESS!")
+
 
 
 def main(argv=None):

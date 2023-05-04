@@ -25,7 +25,7 @@ class Coach():
     def __init__(self, game, nnet, args):
         self.game = game
         self.nnet = nnet
-        self.pnet = self.nnet.__class__(self.game)  # the competitor network
+        self.pnet = self.nnet.__class__()  # the competitor network
         self.args = args
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
@@ -64,7 +64,7 @@ class Coach():
             #print("Action: ", action)
             #print("Policy: ", pi)
 
-            trainExamples.append([Graph.state_to_graph_data(state,self.game),pi,state.current_player(),None])
+            trainExamples.append([Graph.state_to_graph_data(state),pi,state.current_player(),None])
             
             state.apply_action(action)
             #print("New state:")
@@ -99,7 +99,7 @@ class Coach():
                         self.game,
                         self.args.cpuct,
                         self.args.numMCTSSims,
-                        GNNEvaluator(self.game, self.nnet, self.args)
+                        GNNEvaluator( self.nnet, self.args)
                     ) 
 
                     iterationTrainExamples += self.executeEpisode()
@@ -127,7 +127,7 @@ class Coach():
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             pmcts  = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
-                        GNNEvaluator(self.game, self.pnet, self.args)) 
+                        GNNEvaluator( self.pnet, self.args)) 
 
             # train the GNNet on the new examples
             print("Amount of training examples: ", len(trainExamples))
@@ -136,7 +136,7 @@ class Coach():
             #self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
 
             nmcts = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
-                        GNNEvaluator(self.game, self.nnet, self.args)) 
+                        GNNEvaluator( self.nnet, self.args)) 
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(pmcts,nmcts, self.game)

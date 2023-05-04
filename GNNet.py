@@ -8,23 +8,23 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.data import Batch
 from torch.utils.data import Dataset
 import Graph
+from tqdm import tqdm
+
 
 args = dotdict({
-    'lr': 0.0001,
+    'lr': 0.00001,
     'dropout': 0.3,
-    'epochs': 10,
-    'batch_size': 64,
+    'epochs': 15,
+    'batch_size': 32,
     'cuda': True,
     'num_channels': 512,
 })
 
 
 class GNNetWrapper():
-    def __init__(self, game):
-        self.nnet = CustomGNN(num_features=2,channels=512)
-        self.game = game
+    def __init__(self):
+        self.nnet = CustomGNN(num_features=2,channels=args.num_channels)
     
-
     def train(self, examples):
         """
         examples: list of examples, each example is of form (graph, pi, v)
@@ -42,49 +42,31 @@ class GNNetWrapper():
         #print("target_values type:", type(target_values))
         
         optimizer = torch.optim.Adam(self.nnet.parameters(), lr=args.lr)
-        criterion = nn.BCELoss()
-        # train_dataset = CustomGraphDataset(input_graphs,target_pis,target_values)
-        # train_loader = DataLoader(train_dataset,batch_size=32,shuffle=True,collate_fn=custom_collate)
-
-        # def combined_loss(edge_probs, target_edge_probs, value_preds, target_values, alpha=0.5):
-        #     print(edge_probs)
-        #     edge_probs = torch.tensor(edge_probs)
-        #     print(target_edge_probs)
-        #     target_edge_probs = torch.tensor(target_edge_probs)
-        #     value_preds = torch.tensor(value_preds)
-        #     target_values = torch.tensor(target_values)
-        #     print("edge_probs shape:", edge_probs.shape)
-        #     print("target_edge_probs shape:", target_edge_probs.shape)
-        #     print("value_preds shape:", value_preds.shape)
-        #     print("target_values shape:", target_values.shape)
-        #     edge_loss = criterion(edge_probs, target_edge_probs)
-        #     value_loss = criterion(value_preds, target_values)
-        #     return alpha * edge_loss + (1 - alpha) * value_loss
         
-        # total_loss = 0
-        # for epoch in range(args.epochs):
-        #     self.nnet.train()
-        #     for batch_graph,target_pis,target_values in train_loader:
-        #         optimizer.zero_grad()
-        #         edge_probs, value = self.nnet(batch_graph)
-        #         #pred_pis = Graph.edges_to_actions(self.game,edge_probs)
-        #         loss = combined_loss(edge_probs, target_pis, value, target_values)
-        #         loss.backward()
-        #         optimizer.step()
-        #         total_loss += loss.item()
-        #         print("Epoch: {}, Loss: {:.4f}".format(epoch, total_loss))
+        train_dataset = CustomGraphDataset(input_graphs,target_pis,target_values)
+        train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True,collate_fn=custom_collate)
+
+        
 
         def custom_loss(pi,target_pi,value,target_value):
-            mse_loss = nn.MSELoss()(value,target_value)
+            #target_pi = target_pi.view(-1)
+            #print("pred_pi shape:", pi.shape)
+            #print("target_pi shape:", target_pi.shape)
+            #pi = target_pi.view_as(target_pi)
+            #print("pred_pi shape:", pi.shape)
+            mse_loss = nn.MSELoss()(value.view(-1),target_value.view(-1))
             cross_entropy_loss = nn.CrossEntropyLoss()(pi,target_pi)
+            #bce_loss = nn.BCEWithLogitsLoss()(pi,target_pi)
+            #kl_div_loss = nn.KLDivLoss(reduction='batchmean')(F.log_softmax(pi,dim=1),target_pi)
             return mse_loss, cross_entropy_loss
 
-        for epoch in range(args.epochs):
+        for epoch in tqdm(range(args.epochs),desc="Training GNNet"):
             self.nnet.train()
             total_loss = 0
             total_value_loss = 0
             total_policy_loss = 0
             for i in range(len(input_graphs)):
+            #for graph,target_pi,target_value in train_loader:
                 # train per example => batch could be better
                 graph = input_graphs[i]
                 target_pi = torch.tensor(target_pis[i])
@@ -107,18 +89,16 @@ class GNNetWrapper():
                 total_loss += loss.item()
                 total_value_loss += value_loss.item()
                 total_policy_loss += policy_loss.item()
-            print("Epoch: {}, Total loss: {:.4f}, Total value loss: {:.2f}, Total policy loss: {:.2f},Examples: {}".format(epoch, total_loss,total_value_loss,total_policy_loss,len(input_graphs)))
+            print("Epoch: {}, Total loss: {:.4f}, Total value loss: {:.2f}, Total policy loss: {:.2f},Examples: {}".format(epoch+1, total_loss,total_value_loss,total_policy_loss,len(input_graphs)))
             
 
 
 
     def predict(self, state):
-        
-
         # turn board representation into a graph
         # use the graph as input to the model
 
-        data = Graph.state_to_graph_data(state,self.game)
+        data = Graph.state_to_graph_data(state)
         self.nnet.eval()
         with torch.no_grad():
             edge_probs,value = self.nnet(data)
@@ -178,6 +158,7 @@ class CustomGNN(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, edge_attr , batch = data.x, data.edge_index, data.edge_attr, data.batch
+        # !!!!! edge_attr is not used
         x1 = F.relu(self.conv1(x, edge_index))
         x2 = F.relu(self.conv2(x1, edge_index))
         x3 = F.relu(self.conv3(x2, edge_index))
@@ -200,7 +181,7 @@ class CustomGraphDataset(Dataset):
         self.target_values = target_values
 
     def __getitem__(self, index):
-        return self.input_graphs[index], self.target_pis[index], self.target_values[index]
+        return self.input_graphs[index], torch.tensor(self.target_pis[index]), torch.tensor(self.target_values[index])
 
     def __len__(self):
         return len(self.input_graphs)

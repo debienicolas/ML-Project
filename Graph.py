@@ -6,11 +6,12 @@ import pyspiel
 
 
 
-def state_to_graph_data(state,game):
+def state_to_graph_data(state):
     """
     This function takes a state and returns a PyTorch Geometric Data object
     in the perspective of the current player of the state (so the first player)
     """
+    game = state.get_game()
     cols, rows = game.get_parameters()["num_cols"], game.get_parameters()["num_rows"]
     num_nodes = cols*rows
 
@@ -173,7 +174,8 @@ def getFilledLines(game,obs_tensor,row,col):
 
 
 # the first two rows of the edges doesn't match with the actions
-def edges_to_actions(game,edges):
+def edges_to_actions(state,edges):
+    game = state.get_game()
     num_rows = game.get_parameters()["num_rows"]
     actions = []
     first_row = []

@@ -1,5 +1,6 @@
 import open_spiel.python.algorithms.mcts as mcts
 import time
+import pyspiel
 
 
 
@@ -7,6 +8,9 @@ class MCTS(mcts.MCTSBot):
 
     def step_with_policy_training(self, state):
         """Returns bot's policy and action at given state. Also returns the policy for training"""
+        game = state.get_game()
+        self.max_utility = game.max_utility()
+
         t1 = time.time()
         root = self.mcts_search(state)
 
@@ -28,6 +32,7 @@ class MCTS(mcts.MCTSBot):
 
         mcts_action = best.action
 
+        ### checken of dit klopt ###
         policy = [(child.action, child.prior) for child in root.children]
         # add illegal move with 0 probability
         for i in range(state.num_distinct_actions()):

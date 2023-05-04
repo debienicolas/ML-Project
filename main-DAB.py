@@ -14,7 +14,7 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'numIters': 100,
-    'numEps': 50,              # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.55,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOf'
@@ -24,8 +24,9 @@ args = dotdict({
     'cpuct': 1,
     'checkpoint': 'checkpoint',         
     'load_model': True,
-    'load_folder_file': ('checkpoint','best.h5'),
-    'numItersForTrainExamplesHistory': 4,
+    'load_examples': False,
+    'load_folder_file': ('checkpoint','checkpoint_27.pth.tar'),
+    'numItersForTrainExamplesHistory': 2,
 })
 
 
@@ -41,17 +42,21 @@ def main():
     # log loading the graph neural network
     log.info('Loading the GNNet 🤖')
 
-    gnnet = gnn(game)
+    gnnet = gnn()
     
     if args.load_model:
         # if you want to load the model 
-        gnnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+        gnnet.load_checkpoint(args.checkpoint, 'best.h5')
     else:
         log.warning('Not loading a checkpoint!')
     log.info('Loading the Coach...')
     
+    # load training_examples
     c = Coach(game, gnnet, args)
-
+    # load the training examples 
+    if args.load_examples:
+        log.info("Loading 'trainExamples' from file...")
+        c.loadTrainExamples()
 
     log.info('Starting the learning process 🎉')
     c.learn()
