@@ -1,10 +1,12 @@
 import logging
 import coloredlogs
+from datetime import datetime
 
 from Coach import Coach
 from utils import dotdict
 from GNNet import GNNetWrapper as gnn
 import pyspiel
+
 
 import sys
 sys.path.insert(0, "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/torch_geometric")
@@ -13,9 +15,11 @@ log = logging.getLogger(__name__)
 
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
+now = datetime.now()
+
 args = dotdict({
     'numIters': 20,
-    'numEps': 25,              # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 10,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.55,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOf'
@@ -23,21 +27,22 @@ args = dotdict({
     'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 40,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
-    'checkpoint': 'checkpoint_2x2',         
+    'checkpoint': 'checkpoint_4x4',         
     'load_model': False,
     'load_examples': False,
-    'load_folder_file': ('checkpoint_2x2','checkpoint_5.pth.tar'),
+    'load_folder_file': ('checkpoint_2x2','checkpoint_4.pth.tar'),
     'numItersForTrainExamplesHistory': 6,
 
-    'numMCTSSimsArena':25
+    'numMCTSSimsArena':25,
+    'resultsFilePath': 'results4x4' + now.strftime("%m-%d %H:%M") +  '.csv'
 })
 
 
 def main():
     log.info('Loading: game')
     # create a game object with board size 4
-    num_rows = 2
-    num_cols = 2
+    num_rows = 4
+    num_cols = 4
     game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
 
     game = pyspiel.load_game(game_string)
@@ -45,7 +50,7 @@ def main():
     # log loading the graph neural network
     log.info('Loading the GNNet 🤖')
 
-    gnnet = gnn()
+    gnnet = gnn(argsargs=args,save_info=True)
     
     if args.load_model:
         # if you want to load the model 

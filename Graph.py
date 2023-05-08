@@ -18,7 +18,7 @@ def state_to_graph_data(state):
     num_nodes += 1 
 
     # Node features
-    x = torch.zeros((num_nodes, 2), dtype=torch.float32)
+    x = torch.zeros((num_nodes, 1), dtype=torch.float32)
     for i in range(rows):
         for j in range(cols):
             node_index = i * cols + j
@@ -46,7 +46,7 @@ def state_to_graph_data(state):
                     right = 3 - right
             x[node_index, 0] = owner
             # Also the amount of strings that are connected to this node, filled line means that string is not connected
-            x[node_index, 1] = 4 - getFilledLines(game,state.observation_tensor(),i,j)
+            #x[node_index, 1] = 4 - getFilledLines(game,state.observation_tensor(),i,j)
 
             # x[node_index, 2] = top
             # x[node_index, 3] = right
@@ -149,13 +149,14 @@ def state_to_graph_data(state):
     # turn edge index into a tensor
     edge_index = torch.tensor(edge_index, dtype=torch.int64).t().contiguous()
     # turn edge attribute into a tensor
-    edge_attr = torch.tensor(edge_attr, dtype=torch.int64)
+    edge_attr = torch.tensor(edge_attr, dtype=torch.float32)
+    edge_attr = edge_attr.view(-1, 1)
 
 
     # Batch information
-    batch = torch.zeros(num_nodes, dtype=torch.int64)
+    batch = torch.zeros(32, dtype=torch.int64)
 
-    return geom_data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr,batch=batch) # batch??, add dummy node?
+    return geom_data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr,batch=batch) # batch??
 
 
 def part2num(part):
@@ -206,19 +207,19 @@ def getFilledLines(game,obs_tensor,row,col):
     return connections
 
 
-game = pyspiel.load_game("dots_and_boxes(num_rows=3,num_cols=3)")
-state = game.new_initial_state()
-print(state.current_player())
-state.apply_action(0)
-state.apply_action(1)
-#state.apply_action(2)
-#state.apply_action(6)
-#state.apply_action(7)
-print(state.current_player())
-print(state)
-print(state_to_graph_data(state).x)
-print(state_to_graph_data(state).edge_index)
-print(state_to_graph_data(state).edge_attr)
+# game = pyspiel.load_game("dots_and_boxes(num_rows=3,num_cols=3)")
+# state = game.new_initial_state()
+# print(state.current_player())
+# state.apply_action(0)
+# state.apply_action(1)
+# #state.apply_action(2)
+# #state.apply_action(6)
+# #state.apply_action(7)
+# print(state.current_player())
+# print(state)
+# print(state_to_graph_data(state).x)
+# print(state_to_graph_data(state).edge_index)
+# print(state_to_graph_data(state).edge_attr)
 
 
 
@@ -257,6 +258,3 @@ def edges_to_actions(state,edges):
     actions += second_row
     actions += edges[num_rows*2:]
     return actions
-
-state = game.new_initial_state()
-print(actions_to_edges(state,state.legal_actions()))

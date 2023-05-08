@@ -9,29 +9,42 @@ import torch.nn.functional as F
 from utils import dotdict
 import importlib.util
 from torch_geometric.nn import GINConv, global_mean_pool
+from torch_geometric.nn import GINEConv
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Batch
 from torch.utils.data import Dataset
 import Graph
 from tqdm import tqdm
 from torch_geometric.nn import MessagePassing
+import csv
 
 
 
 args = dotdict({
-    'lr': 0.001,
-    'dropout': 0.3,
+    'lr': 0.01,
     'epochs': 15,
     'batch_size': 32,
-    'cuda': True,
     'num_channels': 512,
     'l2_coeff':1e-4
 })
 
 
 class GNNetWrapper():
-    def __init__(self):
-        self.nnet = CustomGNN(num_features=2,channels=args.num_channels)
+    def __init__(self,argsargs=None,save_info=False):
+        self.nnet = CustomGNN(num_features=1,channels=args.num_channels)
+
+        # save info ot the results file
+        if save_info:
+            with open(argsargs.resultsFilePath,"a",newline='') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                learning_rate = "Learning rate: " + str(args.lr)
+                epochs = "Epochs: " + str(args.epochs)
+                batch_size = "Batch size: " + str(args.batch_size)
+                num_channels = "Number of channels: " + str(args.num_channels)
+                l2_coeff = "L2 coefficient: " + str(args.l2_coeff)
+                csv_writer.writerow([learning_rate, epochs, batch_size, num_channels, l2_coeff])
+
+            
     
     def train(self, examples):
         """
@@ -73,12 +86,12 @@ class GNNetWrapper():
             total_value_loss = 0
             total_policy_loss = 0
             total_reg_loss = 0
-            for i in range(len(input_graphs)):
-            #for graph,target_pi,target_value in train_loader:
+            #for i in range(len(input_graphs)):
+            for graph,target_pi,target_value in train_loader:
                 # train per example => batch could be better
-                graph = input_graphs[i]
-                target_pi = torch.tensor(target_pis[i])
-                target_value = torch.tensor(target_values[i])
+                # graph = input_graphs[i]
+                # target_pi = torch.tensor(target_pis[i])
+                # target_value = torch.tensor(target_values[i])
                 # print("Graph: ", graph)
                 # print("Target pi: ", target_pi.shape, "\ntype: ", type(target_pi))
                 # print("Target value: ", target_value.shape,"\ntype: ", type(target_value))
@@ -104,7 +117,7 @@ class GNNetWrapper():
                 total_policy_loss += policy_loss.item()
                 total_reg_loss += reg_loss.item()
                 
-            print("Epoch: {}, Avg loss: {:.5f}, Avg value loss: {:.5f}, Avg policy loss: {:.5f},Avg reg. loss,Examples: {}".format(epoch+1, total_loss/(len(input_graphs)),total_value_loss/(len(input_graphs)),total_policy_loss/(len(input_graphs)),total_reg_loss/len(input_graphs),len(input_graphs)))
+            print("Epoch: {}, Avg loss: {:.5f}, Avg value loss: {:.5f}, Avg policy loss: {:.5f},Avg reg. loss{:.5f},Examples: {}".format(epoch+1, total_loss/(len(input_graphs)),total_value_loss/(len(input_graphs)),total_policy_loss/(len(input_graphs)),total_reg_loss/len(input_graphs),len(input_graphs)))
         self.nnet.to("cpu")            
 
 
@@ -157,13 +170,13 @@ class CustomGNN(torch.nn.Module):
         super(CustomGNN, self).__init__()
 
         # GINConv layers with layer normalization and ReLU activation
-        self.conv1 = GINConv(nn.Sequential(nn.Linear(num_features, channels),nn.ReLU(),nn.LayerNorm(channels)))
-        self.conv2 = GINConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)))
-        self.conv3 = GINConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)))
+        self.conv1 = GINEConv(nn.Sequential(nn.Linear(num_features, channels),nn.ReLU(),nn.LayerNorm(channels)))
+        self.conv2 = GINEConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)),edge_dim=1)
+        self.conv3 = GINEConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)),edge_dim=1) # edge_dim = 40
 
         # Fully-connected layers with batch normalization, ReLU activation, and dropout
-        self.fc1 = nn.Sequential(nn.Linear(3 * channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
-        self.fc2 = nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
+        self.fc1 = nn.Sequential(nn.Linear(3* channels + num_features , 2 * channels),nn.ReLU(),nn.BatchNorm1d(2*channels))
+        self.fc2 = nn.Sequential(nn.Linear(2*channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
 
         # Policy head that outputs a probability value for each edge in the graph
         self.policy_head = nn.Sequential(nn.Linear(channels, 1),nn.Sigmoid())
@@ -173,19 +186,25 @@ class CustomGNN(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, edge_attr , batch = data.x, data.edge_index, data.edge_attr, data.batch
+        # print("x: ", x.shape)
+        # print(x.dtype)
+        # print("edge index: ", edge_index.shape)
+        # print("edge attr: ", edge_attr.shape)
+        # print(edge_attr.dtype)
+
         # !!!!! edge_attr is not used
-        x1 = self.conv1(x, edge_index)
-        x2 = self.conv2(x1, edge_index)
-        x3 = self.conv3(x2, edge_index)
+        x1 = self.conv1(x, edge_index, edge_attr)
+        x2 = self.conv2(x1, edge_index,edge_attr)
+        x3 = self.conv3(x2, edge_index,edge_attr)
 
         # Concatenate intermediate representations
-        x_concat = torch.cat([x1, x2, x3], dim=-1)
-        x = self.fc1(x_concat)
-        x = self.fc2(x)
+        x_concat = torch.cat([x, x1, x2, x3], dim=-1)
+        x_layer_1 = self.fc1(x_concat)
+        x_layer_2 = self.fc2(x_layer_1)
 
         # Compute policy and value
-        edge_probs = self.policy_head(x[edge_index[0]]).squeeze()
-        value = self.value_head(global_mean_pool(x,batch)).squeeze()
+        edge_probs = self.policy_head(x_layer_2[edge_index[0]]).squeeze()
+        value = self.value_head(global_mean_pool(x_layer_2,None)).squeeze()
 
         return edge_probs, value
 
@@ -220,8 +239,6 @@ class CustomGINConv(MessagePassing):
 
     def forward(self, x, edge_index, edge_attr):
         edge_attr = edge_attr.view(-1, 1)  # Reshape to have a second dimension
-        out = self.propagate(edge_index, x=x, edge_attr=edge_attr)
-        return out
 
     def message(self, x_j, edge_attr):
         return x_j + edge_attr
