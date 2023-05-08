@@ -1,6 +1,8 @@
 import logging
 
 from tqdm import tqdm
+from open_spiel.python.bots.uniform_random import UniformRandomBot
+import numpy as np
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class Arena():
 
             state.apply_action(action)
         
-        return state.rewards()
+        return state.rewards() 
 
     def playGames(self, num, verbose=False):
         """
@@ -87,3 +89,33 @@ class Arena():
                 draws += 1
 
         return oneWon, twoWon, draws
+    
+    def playGamesAgainstRandom(self, player1, num, verbose=False):
+        rp2 = UniformRandomBot(1,np.random)
+        arena = Arena(player1, rp2, self.game)
+        oneWon, twoWon, draws = 0,0,0
+        
+        for i in tqdm(range(num//2), desc="Playing_games_1"):
+            reward = arena.playGame()
+            if reward[0] == 1.0:
+                oneWon += 1
+            elif reward[1] == 1.0:
+                twoWon += 1
+            else:
+                draws += 1
+        
+        rp2 = UniformRandomBot(0,np.random)
+        arena = Arena(rp2,player1, self.game)
+
+        for i in tqdm(range(num//2), desc="Playing_games_2"):
+            reward = arena.playGame()
+            if reward[0] == 1.0:
+                twoWon += 1
+            elif reward[1] == 1.0:
+                oneWon += 1
+            else:
+                draws += 1
+        print("oneWon: {}, twoWon: {}, draws: {}".format(oneWon, twoWon, draws))
+        return oneWon, twoWon, draws
+
+

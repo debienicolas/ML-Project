@@ -14,6 +14,8 @@ def state_to_graph_data(state):
     game = state.get_game()
     cols, rows = game.get_parameters()["num_cols"], game.get_parameters()["num_rows"]
     num_nodes = cols*rows
+    # adding dummy node
+    num_nodes += 1 
 
     # Node features
     x = torch.zeros((num_nodes, 2), dtype=torch.float32)
@@ -21,12 +23,35 @@ def state_to_graph_data(state):
         for j in range(cols):
             node_index = i * cols + j
             owner = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='c')
+            top = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='h')
+            bottom = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i+1, col=j, part='h')
+            left = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='v')
+            right = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j+1, part='v')
+
+            # if current player is 0 => if owner is 0 then it is 0, else if it is 1 it is 1, if it is 2 then it is -1
+            if owner == 2:
+                owner = -1
+            
             # Put in the first player perspective
-            if state.current_player() == 1 & owner != 0:
-                owner = 3 - owner
+            if state.current_player() == 1:
+                if owner != 0:
+                    owner = owner *-1
+                if top != 0:
+                    top = 3 - top
+                if bottom != 0:
+                    bottom = 3 - bottom
+                if left != 0:
+                    left = 3 - left
+                if right != 0:
+                    right = 3 - right
             x[node_index, 0] = owner
             # Also the amount of strings that are connected to this node, filled line means that string is not connected
             x[node_index, 1] = 4 - getFilledLines(game,state.observation_tensor(),i,j)
+
+            # x[node_index, 2] = top
+            # x[node_index, 3] = right
+            # x[node_index, 4] = bottom
+            # x[node_index, 5] = left
 
     # Edge indices
     # Coins and string representation
@@ -37,12 +62,14 @@ def state_to_graph_data(state):
     # edge attributes -> state of the graph
 
     # Top and bottom strings first (vertical strings)
+    dummy_node_index = num_nodes - 1
     for i in range(rows):
         for j in range(cols):
             node_index = i * cols + j
             # if first row than you have to add the top string to the same node
             if i == 0:
-                edge_index.append([node_index, node_index])
+                #edge_index.append([node_index, node_index])
+                edge_index.append([node_index, dummy_node_index])
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='h')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
@@ -59,7 +86,8 @@ def state_to_graph_data(state):
 
             # last row has to set the bottom string to the same node
             if i == rows - 1:
-                edge_index.append([node_index, node_index])
+                #edge_index.append([node_index, node_index])
+                edge_index.append([node_index, dummy_node_index])
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i+1, col=j, part='h')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
@@ -73,7 +101,8 @@ def state_to_graph_data(state):
 
             if j == 0:
                 # Left string
-                edge_index.append([node_index, node_index])
+                #edge_index.append([node_index, node_index])
+                edge_index.append([node_index, dummy_node_index])
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='v')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
@@ -90,13 +119,20 @@ def state_to_graph_data(state):
                 edge_attr.append(edge_state)
             
             if j ==  cols - 1:                
-                edge_index.append([node_index, node_index])
+                #edge_index.append([node_index, node_index])
+                edge_index.append([node_index, dummy_node_index])
                 # set the edge attribute if the edge is filled
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j+1, part='v')
                 
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
                 edge_attr.append(edge_state)
+    
+    # dummy_node_index = rows * cols
+    # for i in range(rows):
+    #     for i in range(cols):
+    #         node_index = i * cols + j
+    #         edge_index.append([node_index, dummy_node_index])
             
     # turn edge index into a tensor
     edge_index = torch.tensor(edge_index, dtype=torch.int64).t().contiguous()
@@ -158,7 +194,7 @@ def getFilledLines(game,obs_tensor,row,col):
     return connections
 
 
-# game = pyspiel.load_game("dots_and_boxes(num_rows=3,num_cols=3)")
+# game = pyspiel.load_game("dots_and_boxes(num_rows=2,num_cols=2)")
 # state = game.new_initial_state()
 # print(state.current_player())
 # state.apply_action(0)
@@ -168,7 +204,7 @@ def getFilledLines(game,obs_tensor,row,col):
 # state.apply_action(7)
 # print(state.current_player())
 # print(state)
-# print(state_to_graph_data(state,game))
+# print(state_to_graph_data(state).x)
 
 
 

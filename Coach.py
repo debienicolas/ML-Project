@@ -13,6 +13,7 @@ from open_spiel.python.algorithms.mcts import MCTSBot
 from GNNEvaluator import GNNEvaluator
 import Graph
 from MCTS import MCTS
+import csv
 log = logging.getLogger(__name__)
 
 
@@ -54,15 +55,20 @@ class Coach():
         #print("Initial state:")
         #print(state)
         self.curPlayer = state.current_player()
+        episodeStep = 0
+
 
         while not state.is_terminal():
+            episodeStep += 1
+            temp = int(episodeStep <= self.args.tempThreshold)
             
             self.curPlayer = state.current_player()
             #print("Current player: ", self.curPlayer)
             #print(state)
-            pi,action= self.mcts.step_with_policy_training(state)
+            pi,action= self.mcts.step_with_policy_training(state,temp)
             #print("Action: ", action)
             #print("Policy: ", pi)
+
 
             trainExamples.append([Graph.state_to_graph_data(state),pi,state.current_player(),None])
             
@@ -84,72 +90,82 @@ class Coach():
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
         """
+        with open("results_random.csv","w",newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Iteration","won_random","lost_random","draw_random","winning rate"])
 
-        for i in range(1, self.args.numIters + 1):
-            # bookkeeping
-            log.info(f'Starting Iter #{i} ...')
-            # examples of the iteration
-            if not self.skipFirstSelfPlay or i > 1:
-                # double ended queue, automatically removes the oldest element if the maxlen is reached
-                iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
+            for i in range(1, self.args.numIters + 1):
+                # bookkeeping
+                log.info(f'Starting Iter #{i} ...')
+                # examples of the iteration
+                if not self.skipFirstSelfPlay or i > 1:
+                    # double ended queue, automatically removes the oldest element if the maxlen is reached
+                    iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
-                # Perform selfplay and add the examples trainExamples
-                for _ in tqdm(range(self.args.numEps), desc="Self Play"):
-                    self.mcts = MCTS(
-                        self.game,
-                        self.args.cpuct,
-                        self.args.numMCTSSims,
-                        GNNEvaluator( self.nnet, self.args)
-                    ) 
+                    # Perform selfplay and add the examples trainExamples
+                    for _ in tqdm(range(self.args.numEps), desc="Self Play"):
+                        self.mcts = MCTS(
+                            self.game,
+                            self.args.cpuct,
+                            self.args.numMCTSSims,
+                            GNNEvaluator( self.nnet, self.args)
+                        ) 
 
-                    iterationTrainExamples += self.executeEpisode()
+                        iterationTrainExamples += self.executeEpisode()
 
-                # save the iteration examples to the history 
-                self.trainExamplesHistory.append(iterationTrainExamples)
+                    # save the iteration examples to the history 
+                    self.trainExamplesHistory.append(iterationTrainExamples)
 
-            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-                log.warning(
-                    f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
-                self.trainExamplesHistory.pop(0)
-            # backup history to a file
-            # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(i - 1)
+                if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
+                    log.warning(
+                        f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
+                    self.trainExamplesHistory.pop(0)
+                # backup history to a file
+                # NB! the examples were collected using the model from the previous iteration, so (i-1)  
+                self.saveTrainExamples(i - 1)
 
-            # shuffle examples before training
-            print("shuffling examples")
+                # shuffle examples before training
+                print("shuffling examples")
+                
+                trainExamples = []
+                for e in self.trainExamplesHistory:
+                    trainExamples.extend(e)
+                shuffle(trainExamples)
+
+                # training new network, keeping a copy of the old one
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                pmcts  = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSimsArena,
+                            GNNEvaluator( self.pnet, self.args)) 
+
+                # train the GNNet on the new examples
+                print("Amount of training examples: ", len(trainExamples))
+                self.nnet.train(trainExamples)
+
+                #self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+
+                nmcts = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSimsArena,
+                            GNNEvaluator( self.nnet, self.args)) 
+
+                log.info('PITTING AGAINST PREVIOUS VERSION')
+                arena = Arena(pmcts,nmcts, self.game)
+                pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
+
+                log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+                if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
+                    log.info('REJECTING NEW MODEL')
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                    won,lost,draw = arena.playGamesAgainstRandom(pmcts,40)
+                else:
+                    log.info('ACCEPTING NEW MODEL')
+                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                    won,lost,draw = arena.playGamesAgainstRandom(nmcts,40)
+                
+                # log the results against random
+                winning_rate = round(won/(won+lost+draw),4)
+                csv_writer.writerow([i,won,lost,draw,winning_rate])
             
-            trainExamples = []
-            for e in self.trainExamplesHistory:
-                trainExamples.extend(e)
-            shuffle(trainExamples)
-
-            # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            pmcts  = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
-                        GNNEvaluator( self.pnet, self.args)) 
-
-            # train the GNNet on the new examples
-            print("Amount of training examples: ", len(trainExamples))
-            self.nnet.train(trainExamples)
-
-            #self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-
-            nmcts = MCTSBot(self.game,self.args.cpuct,self.args.numMCTSSims,
-                        GNNEvaluator( self.nnet, self.args)) 
-
-            log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(pmcts,nmcts, self.game)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
-
-            log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
-                log.info('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            else:
-                log.info('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'

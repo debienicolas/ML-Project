@@ -48,11 +48,11 @@ class Agent(pyspiel.Bot):
         """
         pyspiel.Bot.__init__(self)
         args = dotdict({'cpuct': 1,
-                        'numMCTSSims': 25,
+                        'numMCTSSims': 300,
                         })
         game = pyspiel.load_game("dots_and_boxes")
         n = gnn()
-        n.load_checkpoint("", "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/checkpoint/best.h5")
+        n.load_checkpoint("", "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/checkpoint_2/best.h5")
         self.bot = MCTSBot(game,args.cpuct,args.numMCTSSims,GNNEvaluator(n,args))
         self.player_id = player_id
 

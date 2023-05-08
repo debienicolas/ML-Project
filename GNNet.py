@@ -1,9 +1,14 @@
+import os
+package_directory = os.path.dirname(os.path.abspath(__file__))
+directory_TGM = os.path.join(package_directory, 'torch_geometric')
+print(directory_TGM)
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from utils import dotdict
+import importlib.util
 from torch_geometric.nn import GINConv, global_mean_pool
-import os
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Batch
 from torch.utils.data import Dataset
@@ -11,13 +16,16 @@ import Graph
 from tqdm import tqdm
 
 
+
+
 args = dotdict({
-    'lr': 0.00001,
+    'lr': 0.001,
     'dropout': 0.3,
     'epochs': 15,
     'batch_size': 32,
     'cuda': True,
     'num_channels': 512,
+    'l2_coeff':1e-4
 })
 
 
@@ -29,68 +37,75 @@ class GNNetWrapper():
         """
         examples: list of examples, each example is of form (graph, pi, v)
         """
-
-        #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # model = self.nnet.to(device)
-        # data = examples[0].to(device)
-
-        # turn examples into numpy arrays
-        
+        device = torch.device("mps")
         input_graphs, target_pis, target_values = list(zip(*examples))
-        #print("input_graphs type:", type(input_graphs))
-        #print("target_pis type:", type(target_pis))
-        #print("target_values type:", type(target_values))
         
         optimizer = torch.optim.Adam(self.nnet.parameters(), lr=args.lr)
         
         train_dataset = CustomGraphDataset(input_graphs,target_pis,target_values)
-        train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True,collate_fn=custom_collate)
+        train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True)
 
-        
+        device = torch.device("mps")
+        self.nnet.to(device)
 
         def custom_loss(pi,target_pi,value,target_value):
             #target_pi = target_pi.view(-1)
             #print("pred_pi shape:", pi.shape)
             #print("target_pi shape:", target_pi.shape)
-            #pi = target_pi.view_as(target_pi)
+            pi = pi.view_as(target_pi)
             #print("pred_pi shape:", pi.shape)
             mse_loss = nn.MSELoss()(value.view(-1),target_value.view(-1))
             cross_entropy_loss = nn.CrossEntropyLoss()(pi,target_pi)
-            #bce_loss = nn.BCEWithLogitsLoss()(pi,target_pi)
+            #bce_loss = nn.BCELoss()(pi,target_pi)
             #kl_div_loss = nn.KLDivLoss(reduction='batchmean')(F.log_softmax(pi,dim=1),target_pi)
-            return mse_loss, cross_entropy_loss
+
+            # L2 regularization
+            l2_reg = torch.tensor(0., device=value.device)
+            for param in self.nnet.parameters():
+                l2_reg += torch.norm(param,p=2)**2
+            l2_loss = args.l2_coeff * l2_reg
+
+            return mse_loss, cross_entropy_loss, l2_loss
 
         for epoch in tqdm(range(args.epochs),desc="Training GNNet"):
             self.nnet.train()
             total_loss = 0
             total_value_loss = 0
             total_policy_loss = 0
+            total_reg_loss = 0
             for i in range(len(input_graphs)):
             #for graph,target_pi,target_value in train_loader:
                 # train per example => batch could be better
                 graph = input_graphs[i]
                 target_pi = torch.tensor(target_pis[i])
                 target_value = torch.tensor(target_values[i])
-                #print("Graph: ", graph)
-                #print("Target pi: ", target_pi, "\ntype: ", type(target_pi))
-                #print("Target value: ", target_value,"\ntype: ", type(target_value))
+                # print("Graph: ", graph)
+                # print("Target pi: ", target_pi.shape, "\ntype: ", type(target_pi))
+                # print("Target value: ", target_value.shape,"\ntype: ", type(target_value))
+
+                graph = graph.to(device)
+                target_pi = target_pi.to(device)
+                target_value = target_value.to(device)
 
                 optimizer.zero_grad()
+
                 pred_pi, pred_value = self.nnet(graph)
 
                 # print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
                 # print("Pred value: ", pred_value, "\ntarget value: ", target_value)
                 #loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
-                value_loss , policy_loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
-                loss = value_loss + policy_loss
+                value_loss , policy_loss, reg_loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
+                loss = value_loss + policy_loss + reg_loss
                 #loss = F.nll_loss(pred_pi,target_pi) + F.mse_loss(pred_value,target_value)
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
                 total_value_loss += value_loss.item()
                 total_policy_loss += policy_loss.item()
-            print("Epoch: {}, Total loss: {:.4f}, Total value loss: {:.2f}, Total policy loss: {:.2f},Examples: {}".format(epoch+1, total_loss,total_value_loss,total_policy_loss,len(input_graphs)))
-            
+                total_reg_loss += reg_loss.item()
+                
+            print("Epoch: {}, Avg loss: {:.5f}, Avg value loss: {:.5f}, Avg policy loss: {:.5f},Avg reg. loss,Examples: {}".format(epoch+1, total_loss/(len(input_graphs)),total_value_loss/(len(input_graphs)),total_policy_loss/(len(input_graphs)),total_reg_loss/len(input_graphs),len(input_graphs)))
+        self.nnet.to("cpu")            
 
 
 
@@ -147,8 +162,8 @@ class CustomGNN(torch.nn.Module):
         self.conv3 = GINConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)))
 
         # Fully-connected layers with batch normalization, ReLU activation, and dropout
-        self.fc1 = nn.Sequential(nn.Linear(3 * channels, channels),nn.ReLU(),nn.BatchNorm1d(channels),nn.Dropout(0.5))
-        self.fc2 = nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.BatchNorm1d(channels),nn.Dropout(0.5))
+        self.fc1 = nn.Sequential(nn.Linear(3 * channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
+        self.fc2 = nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
 
         # Policy head that outputs a probability value for each edge in the graph
         self.policy_head = nn.Sequential(nn.Linear(channels, 1),nn.Sigmoid())
@@ -165,11 +180,12 @@ class CustomGNN(torch.nn.Module):
 
         # Concatenate intermediate representations
         x_concat = torch.cat([x1, x2, x3], dim=-1)
-        x_fc = self.fc2(self.fc1(x_concat))
+        x = self.fc1(x_concat)
+        x = self.fc2(x)
 
         # Compute policy and value
-        edge_probs = self.policy_head(x_fc[edge_index[0]]).squeeze()
-        value = self.value_head(global_mean_pool(x_fc,batch)).squeeze()
+        edge_probs = self.policy_head(x[edge_index[0]]).squeeze()
+        value = self.value_head(global_mean_pool(x,batch)).squeeze()
 
         return edge_probs, value
 
@@ -181,17 +197,15 @@ class CustomGraphDataset(Dataset):
         self.target_values = target_values
 
     def __getitem__(self, index):
-        return self.input_graphs[index], torch.tensor(self.target_pis[index]), torch.tensor(self.target_values[index])
+        device = torch.device("mps")
+        return self.input_graphs[index].to(device), torch.tensor(self.target_pis[index]).to(device), torch.tensor(self.target_values[index]).to(device)
 
     def __len__(self):
         return len(self.input_graphs)
     
 def custom_collate(batch):
-    input_graphs, target_pis, target_values = zip(*batch)
-    batch_graph = Batch.from_data_list(input_graphs)
-    batch_target_pis = torch.tensor(target_pis, dtype=torch.float)
-    batch_target_values = torch.tensor(target_values, dtype=torch.float)
-    return batch_graph, batch_target_pis, batch_target_values
+    graphs, target_pis, target_values = zip(*batch)
+    return graphs, torch.tensor(target_pis), torch.tensor(target_values)
 
 def create_batch(input_graphs):
     batch_graph = Batch.from_data_list(input_graphs)

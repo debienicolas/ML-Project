@@ -28,7 +28,7 @@ from collections import defaultdict
 
 import pyspiel
 import open_spiel
-from tournament import load_agent_from_dir
+from dotsandboxes.tournament import load_agent_from_dir
 
 
 logger = logging.getLogger(__name__)
