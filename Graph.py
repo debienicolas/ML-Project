@@ -73,6 +73,8 @@ def state_to_graph_data(state):
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='h')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
             
             # from first row till the last row you have to add the bottom string with another node
@@ -82,6 +84,8 @@ def state_to_graph_data(state):
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i+1, col=j, part='h')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
 
             # last row has to set the bottom string to the same node
@@ -91,6 +95,8 @@ def state_to_graph_data(state):
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i+1, col=j, part='h')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
 
     # Left and right strings (horizontal strings)
@@ -106,6 +112,8 @@ def state_to_graph_data(state):
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j, part='v')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
 
             if j < cols - 1:
@@ -116,6 +124,8 @@ def state_to_graph_data(state):
                 edge_state = get_observation_state(game=game,obs_tensor=state.observation_tensor(), row=i, col=j+1, part='v')
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
             
             if j ==  cols - 1:                
@@ -126,6 +136,8 @@ def state_to_graph_data(state):
                 
                 if state.current_player() == 1 & edge_state != 0:
                     edge_state = 3 - edge_state
+                if edge_state == 2:
+                    edge_state = -1
                 edge_attr.append(edge_state)
     
     # dummy_node_index = rows * cols
@@ -194,22 +206,42 @@ def getFilledLines(game,obs_tensor,row,col):
     return connections
 
 
-# game = pyspiel.load_game("dots_and_boxes(num_rows=2,num_cols=2)")
-# state = game.new_initial_state()
-# print(state.current_player())
-# state.apply_action(0)
-# state.apply_action(1)
-# state.apply_action(2)
-# state.apply_action(6)
-# state.apply_action(7)
-# print(state.current_player())
-# print(state)
-# print(state_to_graph_data(state).x)
+game = pyspiel.load_game("dots_and_boxes(num_rows=3,num_cols=3)")
+state = game.new_initial_state()
+print(state.current_player())
+state.apply_action(0)
+state.apply_action(1)
+#state.apply_action(2)
+#state.apply_action(6)
+#state.apply_action(7)
+print(state.current_player())
+print(state)
+print(state_to_graph_data(state).x)
+print(state_to_graph_data(state).edge_index)
+print(state_to_graph_data(state).edge_attr)
+
 
 
 
 
 # the first two rows of the edges doesn't match with the actions
+
+def actions_to_edges(state,actions):
+    game = state.get_game()
+    num_rows = game.get_parameters()["num_rows"]
+    edges = []
+    first_row = []
+    second_row = []
+    for i in range(2*num_rows):
+        if i % 2 == 0:
+            first_row.append(actions[i])
+        else:
+            second_row.append(actions[i])
+    edges += first_row
+    edges += second_row
+    edges += actions[2*num_rows:]
+    return edges
+
 def edges_to_actions(state,edges):
     game = state.get_game()
     num_rows = game.get_parameters()["num_rows"]
@@ -225,3 +257,6 @@ def edges_to_actions(state,edges):
     actions += second_row
     actions += edges[num_rows*2:]
     return actions
+
+state = game.new_initial_state()
+print(actions_to_edges(state,state.legal_actions()))

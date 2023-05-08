@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 args = dotdict({
-    'numIters': 100,
+    'numIters': 20,
     'numEps': 50,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 10,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -46,7 +46,7 @@ games_to_play = 20
 
 # loading the trained model
 n1 = gnn()
-n1.load_checkpoint("", "checkpoint_6_256/best.h5")
+n1.load_checkpoint("", "checkpoint_2x2/best.h5")
 n1p = MCTSBot(game,args.cpuct,args.numMCTSSims,
               GNNEvaluator(n1,args))
 

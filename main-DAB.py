@@ -23,10 +23,10 @@ args = dotdict({
     'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 40,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
-    'checkpoint': 'checkpoint_6_256',         
-    'load_model': True,
-    'load_examples': True,
-    'load_folder_file': ('checkpoint_6_256','checkpoint_5.pth.tar'),
+    'checkpoint': 'checkpoint_2x2',         
+    'load_model': False,
+    'load_examples': False,
+    'load_folder_file': ('checkpoint_2x2','checkpoint_5.pth.tar'),
     'numItersForTrainExamplesHistory': 6,
 
     'numMCTSSimsArena':25
@@ -36,8 +36,8 @@ args = dotdict({
 def main():
     log.info('Loading: game')
     # create a game object with board size 4
-    num_rows = 4
-    num_cols = 4
+    num_rows = 2
+    num_cols = 2
     game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
 
     game = pyspiel.load_game(game_string)

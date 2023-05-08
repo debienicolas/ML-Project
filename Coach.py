@@ -68,7 +68,9 @@ class Coach():
             pi,action= self.mcts.step_with_policy_training(state,temp)
             #print("Action: ", action)
             #print("Policy: ", pi)
-
+            
+            # the pi needs to be transformed to the correct edges of the graph
+            pi = Graph.actions_to_edges(state,pi)
 
             trainExamples.append([Graph.state_to_graph_data(state),pi,state.current_player(),None])
             

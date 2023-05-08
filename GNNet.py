@@ -14,7 +14,7 @@ from torch_geometric.data import Batch
 from torch.utils.data import Dataset
 import Graph
 from tqdm import tqdm
-
+from torch_geometric.nn import MessagePassing
 
 
 
@@ -174,9 +174,9 @@ class CustomGNN(torch.nn.Module):
     def forward(self, data):
         x, edge_index, edge_attr , batch = data.x, data.edge_index, data.edge_attr, data.batch
         # !!!!! edge_attr is not used
-        x1 = F.relu(self.conv1(x, edge_index))
-        x2 = F.relu(self.conv2(x1, edge_index))
-        x3 = F.relu(self.conv3(x2, edge_index))
+        x1 = self.conv1(x, edge_index)
+        x2 = self.conv2(x1, edge_index)
+        x3 = self.conv3(x2, edge_index)
 
         # Concatenate intermediate representations
         x_concat = torch.cat([x1, x2, x3], dim=-1)
@@ -210,3 +210,21 @@ def custom_collate(batch):
 def create_batch(input_graphs):
     batch_graph = Batch.from_data_list(input_graphs)
     return batch_graph
+
+
+
+class CustomGINConv(MessagePassing):
+    def __init__(self, nn, **kwargs):
+        super(CustomGINConv, self).__init__(aggr='add', **kwargs)  # "Add" aggregation
+        self.nn = nn
+
+    def forward(self, x, edge_index, edge_attr):
+        edge_attr = edge_attr.view(-1, 1)  # Reshape to have a second dimension
+        out = self.propagate(edge_index, x=x, edge_attr=edge_attr)
+        return out
+
+    def message(self, x_j, edge_attr):
+        return x_j + edge_attr
+
+    def update(self, aggr_out):
+        return aggr_out
