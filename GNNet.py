@@ -23,8 +23,8 @@ import csv
 args = dotdict({
     'lr': 0.01,
     'epochs': 15,
-    'batch_size': 32,
-    'num_channels': 512,
+    'batch_size': 8,
+    'num_channels': 256,
     'l2_coeff':1e-4
 })
 
@@ -57,14 +57,14 @@ class GNNetWrapper():
         
         train_dataset = CustomGraphDataset(input_graphs,target_pis,target_values)
         train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True)
-
         device = torch.device("mps")
         self.nnet.to(device)
 
         def custom_loss(pi,target_pi,value,target_value):
             #target_pi = target_pi.view(-1)
-            #print("pred_pi shape:", pi.shape)
-            #print("target_pi shape:", target_pi.shape)
+            # print("pred_pi shape:", pi.shape)
+            # print("target_pi shape:", target_pi.shape)
+
             pi = pi.view_as(target_pi)
             #print("pred_pi shape:", pi.shape)
             mse_loss = nn.MSELoss()(value.view(-1),target_value.view(-1))
@@ -101,9 +101,7 @@ class GNNetWrapper():
                 target_value = target_value.to(device)
 
                 optimizer.zero_grad()
-
                 pred_pi, pred_value = self.nnet(graph)
-
                 # print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
                 # print("Pred value: ", pred_value, "\ntarget value: ", target_value)
                 #loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
@@ -130,6 +128,7 @@ class GNNetWrapper():
         self.nnet.eval()
         with torch.no_grad():
             edge_probs,value = self.nnet(data)
+        
         #print("Edge probs: ", edge_probs)
         #pi = Graph.edges_to_actions(self.game,edge_probs.tolist())
         #print("Pi: ", pi)

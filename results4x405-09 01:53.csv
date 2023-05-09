@@ -1,0 +1,16 @@
+Learning rate: 0.01,Epochs: 15,Batch size: 32,Number of channels: 512,L2 coefficient: 0.0001
+Iteration,won_random,lost_random,draw_random,winning rate,new_model
+Learning rate: 0.01,Epochs: 15,Batch size: 32,Number of channels: 512,L2 coefficient: 0.0001
+Iteration,won_random,lost_random,draw_random,winning rate,new_model
+1,21,17,2,0.525,False
+2,29,11,0,0.725,True
+3,24,15,1,0.6,False
+4,15,22,3,0.375,True
+5,15,24,1,0.375,False
+6,21,18,1,0.525,False
+7,25,15,0,0.625,True
+8,25,15,0,0.625,False
+Learning rate: 0.01,Epochs: 15,Batch size: 32,Number of channels: 512,L2 coefficient: 0.0001
+Iteration,won_random,lost_random,draw_random,winning rate,new_model
+Learning rate: 0.01,Epochs: 15,Batch size: 8,Number of channels: 256,L2 coefficient: 0.0001
+Iteration,won_random,lost_random,draw_random,winning rate,new_model

@@ -46,7 +46,7 @@ games_to_play = 20
 
 # loading the trained model
 n1 = gnn()
-n1.load_checkpoint("", "checkpoint_2x2/best.h5")
+n1.load_checkpoint("", "checkpoint_4x4/best.h5")
 n1p = MCTSBot(game,args.cpuct,args.numMCTSSims,
               GNNEvaluator(n1,args))
 
@@ -54,10 +54,10 @@ n1p = MCTSBot(game,args.cpuct,args.numMCTSSims,
 # loading the random bot
 rp2 = UniformRandomBot(1,np.random)
 
-n2 = gnn()
-n2.load_checkpoint("", "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/checkpoint/best.h5")
-n2p = MCTSBot(game,args.cpuct,args.numMCTSSims,
-                GNNEvaluator(n2,args))
+# n2 = gnn()
+# n2.load_checkpoint("", "/Users/nicolasdebie/Documents/KU Leuven Burgie/Master 1 fase 2/ML project/ML-Project/checkpoint/best.h5")
+# n2p = MCTSBot(game,args.cpuct,args.numMCTSSims,
+#                 GNNEvaluator(n2,args))
 
 
 # loading a mcts bot
