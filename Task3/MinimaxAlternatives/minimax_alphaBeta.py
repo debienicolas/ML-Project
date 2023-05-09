@@ -61,7 +61,7 @@ def main(_):
         print(end-start)
 
     # Take the average of the different execution times.
-    print(f"Execution time: {sum(res)/len(res)}")
+    print(f"Average execution time: {round(sum(res)/len(res),10)}")
 
 if __name__ == "__main__":
     app.run(main)

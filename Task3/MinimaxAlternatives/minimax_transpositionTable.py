@@ -1,3 +1,4 @@
+from sys import getsizeof
 import pyspiel
 from absl import app
 from auxilaryMethods import *
@@ -25,7 +26,7 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
         return state.player_return(maximizing_player_id)
     
     # The key of the table is the lines that are filled in.
-    # Each value in the table is a dictionary 
+    # Each value in the table is a dictionary 1
     # with the value of the score as key and the minimax value as value.
     key = state.dbn_string()
     # Update the list of scored cells after the last action
@@ -55,6 +56,7 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
 
 
 def minimax_search(game,
+                   transpTable=dict(),
                    state=None,
                    maximizing_player_id=None,
                    state_to_key=lambda state: state):
@@ -97,9 +99,6 @@ def minimax_search(game,
     if maximizing_player_id is None:
         maximizing_player_id = state.current_player()
 
-    # Initialise the transposition table as a dictionary.
-    transpTable=dict()
-
     # Get the number of rows and columns of the game board.
     params = game.get_parameters()
     num_rows = params['num_rows']
@@ -115,18 +114,20 @@ def minimax_search(game,
     # For debugging:
     # printTable(transpTable, 1,2)
 
-    return v
+    return v, transpTable
 
 def main(_):
     # The number of times to measure the execution time (and averaging afterwards)
     n = 20
 
     # The number of rows and columns of the game board
-    num_rows = 2
+    num_rows = 3
     num_cols = 3
 
     # A list with the measured execution times
-    res =[]
+    res = []
+    size = []
+    keys = []
 
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
@@ -134,26 +135,41 @@ def main(_):
 
     print("Creating game: {}".format(game_string))
     game = pyspiel.load_game(game_string)
+    state = game.new_initial_state()
+    print(state.dbn_string())
+
+    # Initialise the transposition table as a dictionary.
+    transpTable=dict()
+    print(f"Len: {getsizeof(transpTable)}")
 
     for i in range(n):
         start = time.time()
-
-        value = minimax_search(game)
+        print("Playing game " + str(i))
+        transpTable=dict()
+        value, transpTable = minimax_search(game, transpTable)
 
         end = time.time()
 
         if value == 0:
-            print("It's a draw")
+            print("It's a DRAW")
         else:
             winning_player = 1 if value == 1 else 2
-            print(f"Player {winning_player} wins.")
+            print(f"Player {winning_player} WINS.")
+        
+        print(f"Size: {getsizeof(transpTable)}")
+        print(f"Len: {len(transpTable)}")
+        print("Exe time: " + str(end-start))
 
         res.append(end-start)
-        print(end-start)
+        size.append(getsizeof(transpTable))
+        keys.append(len(transpTable))
 
     # Take the average of the different execution times.
-    print(f"Execution time: {sum(res)/len(res)}")
-
+    print(f"Average execution time: {round(sum(res)/len(res),10)}")
+    # Take the average of the different transp table sizes in bytes.
+    print(f"Average dict size: {sum(size)/len(size)}")
+    # Take the average of the different nr of keys.
+    print(f"Avg nr of keys {sum(keys)/len(keys)}")
 
 if __name__ == "__main__":
     app.run(main)

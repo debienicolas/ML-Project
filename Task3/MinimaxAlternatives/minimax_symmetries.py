@@ -1,3 +1,4 @@
+from sys import getsizeof
 import pyspiel
 from absl import app
 from auxilaryMethods import *
@@ -30,12 +31,19 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
     key = state.dbn_string()
     # Update the list of scored cells after the last action
     score = updateScore(state,num_rows, num_cols, score, action)
-    if (key in transpTable.keys()):
-        k = transpTable[key]
-        if (len(score) in k.keys()):
-            # Current state and score already found
-            return k[len(score)]
-    else:
+    # Set boolean to False
+    inTree = False
+
+    for stateString in symmetricalStates(key,num_rows, num_cols):
+        if (stateString in transpTable.keys()):
+            if inTree == False:
+                inTree = True
+                k = transpTable[stateString]
+                if (len(score) in k.keys()):
+                    # Current state and score already found
+                    return k[len(score)]
+    
+    if not inTree:
         # Current state not found,
         # so initialise a new dictionary for this state.
         transpTable[key] = dict()
@@ -50,15 +58,12 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
 
     # Store the found value.
     result = selection(values_children)
-    for stateString in symmetricalStates(state.dbn_string(),num_rows, num_cols):
-        if not (stateString in transpTable.keys()):
-            transpTable[stateString] = dict()
-        k = transpTable[stateString] 
-        k[len(score)] = result
+    k[len(score)] = result
     return result
 
 
 def minimax_search(game,
+                   transpTable=dict(),
                    state=None,
                    maximizing_player_id=None,
                    state_to_key=lambda state: state):
@@ -102,9 +107,6 @@ def minimax_search(game,
     if maximizing_player_id is None:
         maximizing_player_id = state.current_player()
 
-    # Initialise the transposition table as a dictionary.
-    transpTable=dict()
-
     # Get the number of rows and columns of the game board.
     params = game.get_parameters()
     num_rows = params['num_rows']
@@ -120,7 +122,7 @@ def minimax_search(game,
     # For debugging:
     # printTable(transpTable, 1,2)
 
-    return v
+    return v, transpTable
 
 def symmetricalStates(state, nrRows, nrCols):
     """
@@ -151,6 +153,8 @@ def symmetricalStates(state, nrRows, nrCols):
     #   - columns: each column is a column of vertical lines on the game board
     #           -> size: nrRows
     #           -> each column is a string of length nrCols+1
+
+    #python3 open_spiel/python/examples/mcts.py --game="dots_and_boxes(num_rows=2,num_cols=3)" --player1=human --player2=mcts
     rows = []
     columns = []
     for i in range(nrRows+1):
@@ -182,47 +186,79 @@ def symmetricalStates(state, nrRows, nrCols):
     res.add(state3)
 
     # Check if square board
-    if (nrRows == nrCols):
-        # Diagonally mirrored (top left - bottom right)
-        rows4 = []
-        for j in range(nrRows+1):
-            rows4.append(''.join(column[j] for column in columns))
-        columns4 = []
-        for j in range(nrRows):
-            columns4.append(''.join(row[j] for row in rows))
-        state4 = ''.join(rows4)+''.join(columns4)
+    if (nrRows == nrCols & nrCols > 1):
+        # Rotate original right 90 degrees
+        state4 = rotateRight(state, nrCols)
         res.add(state4)
 
-        # Diagonally mirrored (bottom left - top right)
-        rows5 = [row[::-1] for row in rows4][::-1]
-        columns5 = [column[::-1] for column in columns4][::-1]
-        state5 = ''.join(rows5)+''.join(columns5)
+        # Rotate original right 270 degrees
+        state5 = rotateRight(rotateRight(state4, nrCols), nrCols)
         res.add(state5)
 
-        # Horizontally mirrored states of the diagonally mirrored states
-        rows6 = rows4[::-1]
-        columns6 = columns4[::-1]
-        state6 = ''.join(rows6)+''.join(columns6)
+        # Rotate vertically mirrored 90 degrees
+        state6 = rotateRight(state1, nrCols)
         res.add(state6)
-        rows7 = rows5[::-1]
-        columns7 = columns5[::-1]
-        state7 = ''.join(rows7)+''.join(columns7)
-        res.add(state7)
 
+        # Rotate vertically mirrored 270 degrees
+        state7 = rotateRight(rotateRight(state6,nrCols),nrCols)
+        res.add(state7)
 
     return res
 
+def rotateRight(state,x):
+    newState = ""
+    if x == 2:
+        newState += state[9]
+        newState += state[6]
+        newState += state[10]
+        newState += state[7]
+        newState += state[11]
+        newState += state[8]
+        newState += state[4]
+        newState += state[2]
+        newState += state[0]
+        newState += state[5]
+        newState += state[3]
+        newState += state[1]
+    elif x == 3:
+        newState += state[20]
+        newState += state[16]
+        newState += state[12]
+        newState += state[21]
+        newState += state[17]
+        newState += state[13]
+        newState += state[22]
+        newState += state[18]
+        newState += state[14]
+        newState += state[23]
+        newState += state[19]
+        newState += state[15]
+        newState += state[9]
+        newState += state[6]
+        newState += state[3]
+        newState += state[0]
+        newState += state[10]
+        newState += state[7]
+        newState += state[4]
+        newState += state[1]
+        newState += state[11]
+        newState += state[8]
+        newState += state[5]
+        newState += state[2]
+    return newState
 
 def main(_):
     # The number of times to measure the execution time (and averaging afterwards)
     n = 20
     
     # The number of rows and columns of the game board
-    num_rows = 2
+    num_rows = 3
     num_cols = 3
 
     # A list with the measured execution times
     res = []
+    size = []
+    keys = []
 
     games_list = pyspiel.registered_names()
     assert "dots_and_boxes" in games_list
@@ -233,22 +269,32 @@ def main(_):
 
     for i in range(n):
         start = time.time()
-
-        value = minimax_search(game)
+        print("Playing game " + str(i))
+        transpTable=dict()
+        value, transpTable = minimax_search(game, transpTable)
 
         end = time.time()
 
         if value == 0:
-            print("It's a draw")
+            print("It's a DRAW")
         else:
             winning_player = 1 if value == 1 else 2
-            print(f"Player {winning_player} wins.")
+            print(f"Player {winning_player} WINS.")
         
+        print(f"Size: {getsizeof(transpTable)}")
+        print(f"Len: {len(transpTable)}")
+        print("Exe time: " + str(end-start))
+
         res.append(end-start)
-        print(end-start)
+        size.append(getsizeof(transpTable))
+        keys.append(len(transpTable))
 
     # Take the average of the different execution times.
-    print(f"Execution time: {sum(res)/len(res)}")
+    print(f"Average execution time: {round(sum(res)/len(res),10)}")
+    # Take the average of the different transp table sizes in bytes.
+    print(f"Average dict size: {sum(size)/len(size)}")
+    # Take the average of the different nr of keys.
+    print(f"Avg nr of keys: {sum(keys)/len(keys)}")
 
 
 if __name__ == "__main__":

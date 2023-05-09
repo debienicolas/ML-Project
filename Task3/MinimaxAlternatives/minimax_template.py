@@ -77,8 +77,8 @@ def main(_):
     n = 20
     
     # The number of rows and columns of the game board
-    num_rows = 1
-    num_cols = 4
+    num_rows = 2
+    num_cols = 2
 
     # A list with the measured execution times
     res = []
@@ -92,7 +92,7 @@ def main(_):
 
     for i in range(n):
         start = time.time()
-
+        print("Playing game " + str(i))
         value = minimax_search(game)
 
         end = time.time()
@@ -104,9 +104,9 @@ def main(_):
             print(f"Player {winning_player} wins.")
         
         res.append(end-start)
-        print(end-start)
+        print("Exe time: " + str(end-start))
     # Take the average of the different execution times.
-    print(f"Execution time: {sum(res)/len(res)}")
+    print(f"Average execution time: {round(sum(res)/len(res),10)}")
 
 
 if __name__ == "__main__":
