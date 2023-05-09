@@ -50,20 +50,21 @@ class GNNetWrapper():
         """
         examples: list of examples, each example is of form (graph, pi, v)
         """
-        device = torch.device("mps")
+        #device = torch.device("mps")
         input_graphs, target_pis, target_values = list(zip(*examples))
         
         optimizer = torch.optim.Adam(self.nnet.parameters(), lr=args.lr)
         
         train_dataset = CustomGraphDataset(input_graphs,target_pis,target_values)
-        train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True)
-        device = torch.device("mps")
+        train_loader = DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True,collate_fn=custom_collate)
+        device = torch.device("cpu")
         self.nnet.to(device)
 
         def custom_loss(pi,target_pi,value,target_value):
-            #target_pi = target_pi.view(-1)
-            # print("pred_pi shape:", pi.shape)
-            # print("target_pi shape:", target_pi.shape)
+            print("pred_pi shape:", pi.shape)
+            print("target_pi shape:", target_pi.shape)
+            print("pred_value shape:", value.shape)
+            print("target_value shape:", target_value.shape)
 
             pi = pi.view_as(target_pi)
             #print("pred_pi shape:", pi.shape)
@@ -96,18 +97,18 @@ class GNNetWrapper():
                 # print("Target pi: ", target_pi.shape, "\ntype: ", type(target_pi))
                 # print("Target value: ", target_value.shape,"\ntype: ", type(target_value))
 
-                graph = graph.to(device)
-                target_pi = target_pi.to(device)
-                target_value = target_value.to(device)
+                # graph = graph.to(device)
+                # target_pi = target_pi.to(device)
+                # target_value = target_value.to(device)
 
                 optimizer.zero_grad()
                 pred_pi, pred_value = self.nnet(graph)
-                # print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
-                # print("Pred value: ", pred_value, "\ntarget value: ", target_value)
-                #loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
+                print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
+                print("Pred value: ", pred_value, "\ntarget value: ", target_value)
+
                 value_loss , policy_loss, reg_loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
                 loss = value_loss + policy_loss + reg_loss
-                #loss = F.nll_loss(pred_pi,target_pi) + F.mse_loss(pred_value,target_value)
+
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
@@ -135,7 +136,6 @@ class GNNetWrapper():
 
         # have to check if the actions in pi are legal 
         # only return policy for legal states
-
         return edge_probs,value
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
@@ -203,7 +203,7 @@ class CustomGNN(torch.nn.Module):
 
         # Compute policy and value
         edge_probs = self.policy_head(x_layer_2[edge_index[0]]).squeeze()
-        value = self.value_head(global_mean_pool(x_layer_2,None)).squeeze()
+        value = self.value_head(global_mean_pool(x_layer_2,batch)).squeeze()
 
         return edge_probs, value
 
@@ -215,7 +215,7 @@ class CustomGraphDataset(Dataset):
         self.target_values = target_values
 
     def __getitem__(self, index):
-        device = torch.device("mps")
+        device = torch.device("cpu")
         return self.input_graphs[index].to(device), torch.tensor(self.target_pis[index]).to(device), torch.tensor(self.target_values[index]).to(device)
 
     def __len__(self):

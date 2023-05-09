@@ -154,7 +154,7 @@ def state_to_graph_data(state):
 
 
     # Batch information
-    batch = torch.zeros(32, dtype=torch.int64)
+    batch = torch.zeros(8, dtype=torch.int64)
 
     return geom_data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr,batch=batch) # batch??
 

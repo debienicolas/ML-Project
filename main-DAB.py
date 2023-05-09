@@ -19,7 +19,7 @@ now = datetime.now()
 
 args = dotdict({
     'numIters': 20,
-    'numEps': 60,              # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 1,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.55,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOf'
@@ -30,7 +30,7 @@ args = dotdict({
     'checkpoint': 'checkpoint_4x4_256',         
     'load_model': False,
     'load_examples': False,
-    'load_folder_file': ('checkpoint_2x2','checkpoint_4.pth.tar'),
+    'load_folder_file': ('checkpoint_4x4_256','checkpoint_0.pth.tar'),
     'numItersForTrainExamplesHistory': 6,
 
     'numMCTSSimsArena':25,
