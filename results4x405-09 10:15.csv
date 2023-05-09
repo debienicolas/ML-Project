@@ -1,0 +1,4 @@
+Learning rate: 0.001,Epochs: 15,Batch size: 8,Number of channels: 256,L2 coefficient: 0.0001
+Iteration,won_random,lost_random,draw_random,winning rate,new_model
+1,23,15,2,0.575,False
+2,22,17,1,0.55,False

@@ -21,17 +21,17 @@ import csv
 
 
 args = dotdict({
-    'lr': 0.01,
-    'epochs': 15,
+    'lr': 0.001,
+    'epochs': 25,
     'batch_size': 8,
-    'num_channels': 256,
+    'num_channels': 512,
     'l2_coeff':1e-4
 })
 
 
 class GNNetWrapper():
     def __init__(self,argsargs=None,save_info=False):
-        self.nnet = CustomGNN(num_features=1,channels=args.num_channels)
+        self.nnet = CustomGNN(num_features=2,channels=args.num_channels)
 
         # save info ot the results file
         if save_info:
@@ -61,10 +61,10 @@ class GNNetWrapper():
         self.nnet.to(device)
 
         def custom_loss(pi,target_pi,value,target_value):
-            print("pred_pi shape:", pi.shape)
-            print("target_pi shape:", target_pi.shape)
-            print("pred_value shape:", value.shape)
-            print("target_value shape:", target_value.shape)
+            # print("pred_pi shape:", pi.shape)
+            # print("target_pi shape:", target_pi.shape)
+            # print("pred_value shape:", value.shape)
+            # print("target_value shape:", target_value.shape)
 
             pi = pi.view_as(target_pi)
             #print("pred_pi shape:", pi.shape)
@@ -103,8 +103,8 @@ class GNNetWrapper():
 
                 optimizer.zero_grad()
                 pred_pi, pred_value = self.nnet(graph)
-                print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
-                print("Pred value: ", pred_value, "\ntarget value: ", target_value)
+                # print("Pred pi: ", len(pred_pi), "\ntarget pi: ", len(target_pi))
+                # print("Pred value: ", pred_value, "\ntarget value: ", target_value)
 
                 value_loss , policy_loss, reg_loss = custom_loss(pred_pi,target_pi,pred_value,target_value)
                 loss = value_loss + policy_loss + reg_loss
@@ -116,7 +116,7 @@ class GNNetWrapper():
                 total_policy_loss += policy_loss.item()
                 total_reg_loss += reg_loss.item()
                 
-            print("Epoch: {}, Avg loss: {:.5f}, Avg value loss: {:.5f}, Avg policy loss: {:.5f},Avg reg. loss{:.5f},Examples: {}".format(epoch+1, total_loss/(len(input_graphs)),total_value_loss/(len(input_graphs)),total_policy_loss/(len(input_graphs)),total_reg_loss/len(input_graphs),len(input_graphs)))
+            print("Epoch: {}, Avg loss: {:.5f}, Avg value loss: {:.5f}, Avg policy loss: {:.5f},Avg reg. loss: {:.5f},Examples: {}".format(epoch+1, total_loss/(len(input_graphs)),total_value_loss/(len(input_graphs)),total_policy_loss/(len(input_graphs)),total_reg_loss/len(input_graphs),len(input_graphs)))
         self.nnet.to("cpu")            
 
 
@@ -169,12 +169,12 @@ class CustomGNN(torch.nn.Module):
         super(CustomGNN, self).__init__()
 
         # GINConv layers with layer normalization and ReLU activation
-        self.conv1 = GINEConv(nn.Sequential(nn.Linear(num_features, channels),nn.ReLU(),nn.LayerNorm(channels)))
+        self.conv1 = GINEConv(nn.Sequential(nn.Linear(num_features, channels),nn.ReLU(),nn.LayerNorm(channels)),edge_dim=1)
         self.conv2 = GINEConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)),edge_dim=1)
         self.conv3 = GINEConv(nn.Sequential(nn.Linear(channels, channels),nn.ReLU(),nn.LayerNorm(channels)),edge_dim=1) # edge_dim = 40
 
         # Fully-connected layers with batch normalization, ReLU activation, and dropout
-        self.fc1 = nn.Sequential(nn.Linear(3* channels + num_features , 2 * channels),nn.ReLU(),nn.BatchNorm1d(2*channels))
+        self.fc1 = nn.Sequential(nn.Linear(3* channels + num_features -1 , 2 * channels),nn.ReLU(),nn.BatchNorm1d(2*channels))
         self.fc2 = nn.Sequential(nn.Linear(2*channels, channels),nn.ReLU(),nn.BatchNorm1d(channels))
 
         # Policy head that outputs a probability value for each edge in the graph

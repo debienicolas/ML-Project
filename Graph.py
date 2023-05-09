@@ -18,7 +18,7 @@ def state_to_graph_data(state):
     num_nodes += 1 
 
     # Node features
-    x = torch.zeros((num_nodes, 1), dtype=torch.float32)
+    x = torch.zeros((num_nodes, 2), dtype=torch.float32)
     for i in range(rows):
         for j in range(cols):
             node_index = i * cols + j
@@ -46,7 +46,7 @@ def state_to_graph_data(state):
                     right = 3 - right
             x[node_index, 0] = owner
             # Also the amount of strings that are connected to this node, filled line means that string is not connected
-            #x[node_index, 1] = 4 - getFilledLines(game,state.observation_tensor(),i,j)
+            x[node_index, 1] = 4 - getFilledLines(game,state.observation_tensor(),i,j)
 
             # x[node_index, 2] = top
             # x[node_index, 3] = right
@@ -154,7 +154,7 @@ def state_to_graph_data(state):
 
 
     # Batch information
-    batch = torch.zeros(8, dtype=torch.int64)
+    batch = torch.zeros(1, dtype=torch.int64)
 
     return geom_data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr,batch=batch) # batch??
 

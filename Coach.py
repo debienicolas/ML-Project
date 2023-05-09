@@ -94,7 +94,7 @@ class Coach():
         """
         with open(self.args.resultsFilePath,"a",newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
-            csv_writer.writerow(["Iteration","won_random","lost_random","draw_random","winning rate","new_model"])
+            csv_writer.writerow(["Iteration","won_random","lost_random","draw_random","winning rate","new_model", "won_mcts","lost_mcts","draw_mcts","winning rate"])
 
         for i in range(1, self.args.numIters + 1):
             # bookkeeping
@@ -157,20 +157,25 @@ class Coach():
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-                won,lost,draw = arena.playGamesAgainstRandom(pmcts,40)
+                #won,lost,draw = arena.playGamesAgainstRandom(pmcts,40)
                 new_model = False
+
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
                 won,lost,draw = arena.playGamesAgainstRandom(nmcts,40)
+                won_m,lost_m,draw_m = arena.playGamesAgainstMCTS(nmcts,40)
                 new_model = True
+
                 
-                # log the results against random
-            with open(self.args.resultsFilePath,"a",newline='') as csvfile:
-                csv_writer = csv.writer(csvfile)
-                winning_rate = round(won/(won+lost+draw),4)
-                csv_writer.writerow([i,won,lost,draw,winning_rate,new_model])
+            # log the results against random
+            if new_model:
+                with open(self.args.resultsFilePath,"a",newline='') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    winning_rate = round(won/(won+lost+draw),4)
+                    winning_rate_m = round(won_m/(won_m+lost_m+draw_m),4)
+                    csv_writer.writerow([i,won,lost,draw,winning_rate,new_model,won_m,lost_m,draw_m,winning_rate_m])
             
 
     def getCheckpointFile(self, iteration):
