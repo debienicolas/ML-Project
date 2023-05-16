@@ -1,0 +1,378 @@
+[2023-05-16 17:28:52.155] learner started
+[2023-05-16 17:28:52.155] Initializing model
+[2023-05-16 17:28:55.609] Model type: conv2d(128, 3)
+[2023-05-16 17:28:55.610] Model size: 367866 variables
+[2023-05-16 17:28:55.954] Initial checkpoint: ./checkpointAZ/checkpoint-0
+[2023-05-16 17:34:23.382] Step: 1
+[2023-05-16 17:34:23.383] Collected  6720 states from  60 games, 17.3 states/s. 8.7 states/(s*actor), game length: 112.0
+[2023-05-16 17:34:23.383] Buffer size: 6720. States seen: 6720
+[2023-05-16 17:35:34.723] Losses(total: 3.947, policy: 3.735, value: 0.164, l2: 0.049)
+[2023-05-16 17:35:34.725] Checkpoint saved: ./checkpointAZ/checkpoint-1
+[2023-05-16 17:35:34.726]
+[2023-05-16 17:39:20.569] Step: 2
+[2023-05-16 17:39:20.571] Collected  6720 states from  60 games, 22.6 states/s. 11.3 states/(s*actor), game length: 112.0
+[2023-05-16 17:39:20.572] Buffer size: 13440. States seen: 13440
+[2023-05-16 17:41:34.381] Losses(total: 3.906, policy: 3.692, value: 0.160, l2: 0.054)
+[2023-05-16 17:41:34.381] Checkpoint saved: ./checkpointAZ/checkpoint-2
+[2023-05-16 17:41:34.383]
+[2023-05-16 17:44:09.862] Step: 3
+[2023-05-16 17:44:09.862] Collected  6720 states from  60 games, 23.2 states/s. 11.6 states/(s*actor), game length: 112.0
+[2023-05-16 17:44:09.863] Buffer size: 20000. States seen: 20160
+[2023-05-16 17:47:29.119] Losses(total: 3.768, policy: 3.599, value: 0.103, l2: 0.066)
+[2023-05-16 17:47:29.119] Checkpoint saved: ./checkpointAZ/checkpoint-3
+[2023-05-16 17:47:29.119]
+[2023-05-16 17:49:04.270] Step: 4
+[2023-05-16 17:49:04.270] Collected  6720 states from  60 games, 22.8 states/s. 11.4 states/(s*actor), game length: 112.0
+[2023-05-16 17:49:04.270] Buffer size: 20000. States seen: 26880
+[2023-05-16 17:52:19.920] Losses(total: 3.543, policy: 3.353, value: 0.108, l2: 0.081)
+[2023-05-16 17:52:19.924] Checkpoint saved: ./checkpointAZ/checkpoint-4
+[2023-05-16 17:52:19.927]
+[2023-05-16 17:53:48.029] Step: 5
+[2023-05-16 17:53:48.029] Collected  6720 states from  60 games, 23.7 states/s. 11.8 states/(s*actor), game length: 112.0
+[2023-05-16 17:53:48.029] Buffer size: 20000. States seen: 33600
+[2023-05-16 17:57:03.391] Losses(total: 3.363, policy: 3.149, value: 0.121, l2: 0.093)
+[2023-05-16 17:57:03.393] Checkpoint saved: ./checkpointAZ/checkpoint-5
+[2023-05-16 17:57:03.394]
+[2023-05-16 17:58:36.072] Step: 6
+[2023-05-16 17:58:36.073] Collected  6720 states from  60 games, 23.3 states/s. 11.7 states/(s*actor), game length: 112.0
+[2023-05-16 17:58:36.073] Buffer size: 20000. States seen: 40320
+[2023-05-16 18:01:50.464] Losses(total: 3.243, policy: 3.026, value: 0.116, l2: 0.101)
+[2023-05-16 18:01:50.465] Checkpoint saved: ./checkpointAZ/checkpoint-6
+[2023-05-16 18:01:50.467]
+[2023-05-16 18:03:17.295] Step: 7
+[2023-05-16 18:03:17.296] Collected  6720 states from  60 games, 23.9 states/s. 11.9 states/(s*actor), game length: 112.0
+[2023-05-16 18:03:17.296] Buffer size: 20000. States seen: 47040
+[2023-05-16 18:06:32.478] Losses(total: 3.161, policy: 2.945, value: 0.110, l2: 0.105)
+[2023-05-16 18:06:32.479] Checkpoint saved: ./checkpointAZ/checkpoint-7
+[2023-05-16 18:06:32.484]
+[2023-05-16 18:07:54.073] Step: 8
+[2023-05-16 18:07:54.074] Collected  6720 states from  60 games, 24.3 states/s. 12.1 states/(s*actor), game length: 112.0
+[2023-05-16 18:07:54.075] Buffer size: 20000. States seen: 53760
+[2023-05-16 18:11:04.735] Losses(total: 3.132, policy: 2.899, value: 0.124, l2: 0.109)
+[2023-05-16 18:11:04.735] Checkpoint saved: ./checkpointAZ/checkpoint-8
+[2023-05-16 18:11:04.736]
+[2023-05-16 18:12:33.440] Step: 9
+[2023-05-16 18:12:33.442] Collected  6720 states from  60 games, 24.1 states/s. 12.0 states/(s*actor), game length: 112.0
+[2023-05-16 18:12:33.442] Buffer size: 20000. States seen: 60480
+[2023-05-16 18:15:51.950] Losses(total: 3.057, policy: 2.825, value: 0.119, l2: 0.113)
+[2023-05-16 18:15:51.951] Checkpoint saved: ./checkpointAZ/checkpoint-9
+[2023-05-16 18:15:51.952]
+[2023-05-16 18:17:30.995] Step: 10
+[2023-05-16 18:17:30.995] Collected  6720 states from  60 games, 22.6 states/s. 11.3 states/(s*actor), game length: 112.0
+[2023-05-16 18:17:30.995] Buffer size: 20000. States seen: 67200
+[2023-05-16 18:21:42.718] Losses(total: 3.022, policy: 2.794, value: 0.114, l2: 0.114)
+[2023-05-16 18:21:42.718] Checkpoint saved: ./checkpointAZ/checkpoint-10
+[2023-05-16 18:21:42.724]
+[2023-05-16 18:23:50.208] Step: 11
+[2023-05-16 18:23:50.218] Collected  6720 states from  60 games, 17.7 states/s. 8.9 states/(s*actor), game length: 112.0
+[2023-05-16 18:23:50.223] Buffer size: 20000. States seen: 73920
+[2023-05-16 18:28:38.907] Losses(total: 3.014, policy: 2.786, value: 0.112, l2: 0.116)
+[2023-05-16 18:28:38.908] Checkpoint saved: ./checkpointAZ/checkpoint-11
+[2023-05-16 18:28:38.909]
+[2023-05-16 18:30:24.622] Step: 12
+[2023-05-16 18:30:24.623] Collected  6720 states from  60 games, 17.0 states/s. 8.5 states/(s*actor), game length: 112.0
+[2023-05-16 18:30:24.624] Buffer size: 20000. States seen: 80640
+[2023-05-16 18:34:01.356] Losses(total: 3.008, policy: 2.785, value: 0.106, l2: 0.117)
+[2023-05-16 18:34:01.357] Checkpoint saved: ./checkpointAZ/checkpoint-12
+[2023-05-16 18:34:01.376]
+[2023-05-16 18:35:53.800] Step: 13
+[2023-05-16 18:35:53.801] Collected  6720 states from  60 games, 20.4 states/s. 10.2 states/(s*actor), game length: 112.0
+[2023-05-16 18:35:53.804] Buffer size: 20000. States seen: 87360
+[2023-05-16 18:40:07.637] Losses(total: 3.034, policy: 2.775, value: 0.140, l2: 0.119)
+[2023-05-16 18:40:07.637] Checkpoint saved: ./checkpointAZ/checkpoint-13
+[2023-05-16 18:40:07.648]
+[2023-05-16 18:41:43.451] Step: 14
+[2023-05-16 18:41:43.452] Collected  6720 states from  60 games, 19.2 states/s. 9.6 states/(s*actor), game length: 112.0
+[2023-05-16 18:41:43.453] Buffer size: 20000. States seen: 94080
+[2023-05-16 18:45:07.547] Losses(total: 3.033, policy: 2.781, value: 0.130, l2: 0.122)
+[2023-05-16 18:45:07.548] Checkpoint saved: ./checkpointAZ/checkpoint-14
+[2023-05-16 18:45:07.550]
+[2023-05-16 18:46:37.404] Step: 15
+[2023-05-16 18:46:37.404] Collected  6720 states from  60 games, 22.9 states/s. 11.4 states/(s*actor), game length: 112.0
+[2023-05-16 18:46:37.404] Buffer size: 20000. States seen: 100800
+[2023-05-16 18:50:06.984] Losses(total: 3.032, policy: 2.773, value: 0.137, l2: 0.123)
+[2023-05-16 18:50:06.984] Checkpoint saved: ./checkpointAZ/checkpoint-15
+[2023-05-16 18:50:06.985]
+[2023-05-16 18:51:39.390] Step: 16
+[2023-05-16 18:51:39.390] Collected  6720 states from  60 games, 22.3 states/s. 11.1 states/(s*actor), game length: 112.0
+[2023-05-16 18:51:39.390] Buffer size: 20000. States seen: 107520
+[2023-05-16 18:55:02.469] Losses(total: 3.011, policy: 2.763, value: 0.123, l2: 0.125)
+[2023-05-16 18:55:02.471] Checkpoint saved: ./checkpointAZ/checkpoint-16
+[2023-05-16 18:55:02.480]
+[2023-05-16 18:56:43.882] Step: 17
+[2023-05-16 18:56:43.883] Collected  6720 states from  60 games, 22.1 states/s. 11.0 states/(s*actor), game length: 112.0
+[2023-05-16 18:56:43.883] Buffer size: 20000. States seen: 114240
+[2023-05-16 19:00:09.899] Losses(total: 2.994, policy: 2.752, value: 0.116, l2: 0.127)
+[2023-05-16 19:00:09.899] Checkpoint saved: ./checkpointAZ/checkpoint-17
+[2023-05-16 19:00:09.902]
+[2023-05-16 19:01:41.690] Step: 18
+[2023-05-16 19:01:41.690] Collected  6720 states from  60 games, 22.6 states/s. 11.3 states/(s*actor), game length: 112.0
+[2023-05-16 19:01:41.690] Buffer size: 20000. States seen: 120960
+[2023-05-16 19:04:57.706] Losses(total: 2.987, policy: 2.746, value: 0.114, l2: 0.128)
+[2023-05-16 19:04:57.706] Checkpoint saved: ./checkpointAZ/checkpoint-18
+[2023-05-16 19:04:57.707]
+[2023-05-16 19:06:19.761] Step: 19
+[2023-05-16 19:06:19.761] Collected  6720 states from  60 games, 24.2 states/s. 12.1 states/(s*actor), game length: 112.0
+[2023-05-16 19:06:19.764] Buffer size: 20000. States seen: 127680
+[2023-05-16 19:09:58.048] Losses(total: 2.965, policy: 2.744, value: 0.093, l2: 0.128)
+[2023-05-16 19:09:58.048] Checkpoint saved: ./checkpointAZ/checkpoint-19
+[2023-05-16 19:09:58.052]
+[2023-05-16 19:11:59.258] Step: 20
+[2023-05-16 19:11:59.259] Collected  6720 states from  60 games, 19.8 states/s. 9.9 states/(s*actor), game length: 112.0
+[2023-05-16 19:11:59.259] Buffer size: 20000. States seen: 134400
+[2023-05-16 19:16:03.024] Losses(total: 2.957, policy: 2.732, value: 0.096, l2: 0.129)
+[2023-05-16 19:16:03.024] Checkpoint saved: ./checkpointAZ/checkpoint-20
+[2023-05-16 19:16:03.025]
+[2023-05-16 19:18:02.162] Step: 21
+[2023-05-16 19:18:02.166] Collected  6720 states from  60 games, 18.5 states/s. 9.3 states/(s*actor), game length: 112.0
+[2023-05-16 19:18:02.167] Buffer size: 20000. States seen: 141120
+[2023-05-16 19:21:50.090] Losses(total: 2.953, policy: 2.723, value: 0.100, l2: 0.130)
+[2023-05-16 19:21:50.091] Checkpoint saved: ./checkpointAZ/checkpoint-21
+[2023-05-16 19:21:50.097]
+[2023-05-16 19:23:39.997] Step: 22
+[2023-05-16 19:23:40.006] Collected  6720 states from  60 games, 19.9 states/s. 9.9 states/(s*actor), game length: 112.0
+[2023-05-16 19:23:40.011] Buffer size: 20000. States seen: 147840
+[2023-05-16 19:27:37.650] Losses(total: 2.934, policy: 2.701, value: 0.100, l2: 0.132)
+[2023-05-16 19:27:37.650] Checkpoint saved: ./checkpointAZ/checkpoint-22
+[2023-05-16 19:27:37.653]
+[2023-05-16 19:29:26.900] Step: 23
+[2023-05-16 19:29:26.900] Collected  6720 states from  60 games, 19.4 states/s. 9.7 states/(s*actor), game length: 112.0
+[2023-05-16 19:29:26.900] Buffer size: 20000. States seen: 154560
+[2023-05-16 19:33:11.636] Losses(total: 2.953, policy: 2.712, value: 0.108, l2: 0.134)
+[2023-05-16 19:33:11.636] Checkpoint saved: ./checkpointAZ/checkpoint-23
+[2023-05-16 19:33:11.638]
+[2023-05-16 19:34:37.680] Step: 24
+[2023-05-16 19:34:37.680] Collected  6720 states from  60 games, 21.6 states/s. 10.8 states/(s*actor), game length: 112.0
+[2023-05-16 19:34:37.681] Buffer size: 20000. States seen: 161280
+[2023-05-16 19:38:21.756] Losses(total: 2.962, policy: 2.709, value: 0.117, l2: 0.136)
+[2023-05-16 19:38:21.756] Checkpoint saved: ./checkpointAZ/checkpoint-24
+[2023-05-16 19:38:21.762]
+[2023-05-16 19:39:49.910] Step: 25
+[2023-05-16 19:39:49.911] Collected  6720 states from  60 games, 21.5 states/s. 10.8 states/(s*actor), game length: 112.0
+[2023-05-16 19:39:49.911] Buffer size: 20000. States seen: 168000
+[2023-05-16 19:43:48.927] Losses(total: 2.962, policy: 2.720, value: 0.103, l2: 0.138)
+[2023-05-16 19:43:48.927] Checkpoint saved: ./checkpointAZ/checkpoint-25
+[2023-05-16 19:43:48.928]
+[2023-05-16 19:45:19.147] Step: 26
+[2023-05-16 19:45:19.147] Collected  6720 states from  60 games, 20.4 states/s. 10.2 states/(s*actor), game length: 112.0
+[2023-05-16 19:45:19.148] Buffer size: 20000. States seen: 174720
+[2023-05-16 19:48:40.921] Losses(total: 2.946, policy: 2.703, value: 0.103, l2: 0.140)
+[2023-05-16 19:48:40.921] Checkpoint saved: ./checkpointAZ/checkpoint-26
+[2023-05-16 19:48:40.922]
+[2023-05-16 19:50:11.162] Step: 27
+[2023-05-16 19:50:11.163] Collected  6720 states from  60 games, 23.0 states/s. 11.5 states/(s*actor), game length: 112.0
+[2023-05-16 19:50:11.166] Buffer size: 20000. States seen: 181440
+[2023-05-16 19:53:24.624] Losses(total: 2.952, policy: 2.707, value: 0.103, l2: 0.141)
+[2023-05-16 19:53:24.624] Checkpoint saved: ./checkpointAZ/checkpoint-27
+[2023-05-16 19:53:24.625]
+[2023-05-16 19:54:48.121] Step: 28
+[2023-05-16 19:54:48.121] Collected  6720 states from  60 games, 24.3 states/s. 12.1 states/(s*actor), game length: 112.0
+[2023-05-16 19:54:48.121] Buffer size: 20000. States seen: 188160
+[2023-05-16 19:57:59.069] Losses(total: 2.997, policy: 2.728, value: 0.127, l2: 0.143)
+[2023-05-16 19:57:59.069] Checkpoint saved: ./checkpointAZ/checkpoint-28
+[2023-05-16 19:57:59.072]
+[2023-05-16 19:59:24.135] Step: 29
+[2023-05-16 19:59:24.135] Collected  6720 states from  60 games, 24.3 states/s. 12.2 states/(s*actor), game length: 112.0
+[2023-05-16 19:59:24.135] Buffer size: 20000. States seen: 194880
+[2023-05-16 20:02:33.688] Losses(total: 2.975, policy: 2.714, value: 0.117, l2: 0.144)
+[2023-05-16 20:02:33.690] Checkpoint saved: ./checkpointAZ/checkpoint-29
+[2023-05-16 20:02:33.692]
+[2023-05-16 20:04:01.969] Step: 30
+[2023-05-16 20:04:01.969] Collected  6720 states from  60 games, 24.2 states/s. 12.1 states/(s*actor), game length: 112.0
+[2023-05-16 20:04:01.969] Buffer size: 20000. States seen: 201600
+[2023-05-16 20:07:57.830] Losses(total: 2.954, policy: 2.712, value: 0.096, l2: 0.145)
+[2023-05-16 20:07:57.830] Checkpoint saved: ./checkpointAZ/checkpoint-30
+[2023-05-16 20:07:57.831]
+[2023-05-16 20:09:37.222] Step: 31
+[2023-05-16 20:09:37.223] Collected  6720 states from  60 games, 20.0 states/s. 10.0 states/(s*actor), game length: 112.0
+[2023-05-16 20:09:37.223] Buffer size: 20000. States seen: 208320
+[2023-05-16 20:13:46.708] Losses(total: 2.943, policy: 2.691, value: 0.106, l2: 0.146)
+[2023-05-16 20:13:46.720] Checkpoint saved: ./checkpointAZ/checkpoint-31
+[2023-05-16 20:13:46.726]
+[2023-05-16 20:15:25.418] Step: 32
+[2023-05-16 20:15:25.418] Collected  6720 states from  60 games, 19.3 states/s. 9.6 states/(s*actor), game length: 112.0
+[2023-05-16 20:15:25.418] Buffer size: 20000. States seen: 215040
+[2023-05-16 20:18:47.159] Losses(total: 2.969, policy: 2.697, value: 0.125, l2: 0.147)
+[2023-05-16 20:18:47.159] Checkpoint saved: ./checkpointAZ/checkpoint-32
+[2023-05-16 20:18:47.160]
+[2023-05-16 20:20:33.526] Step: 33
+[2023-05-16 20:20:33.534] Collected  6720 states from  60 games, 21.8 states/s. 10.9 states/(s*actor), game length: 112.0
+[2023-05-16 20:20:33.535] Buffer size: 20000. States seen: 221760
+[2023-05-16 20:24:30.362] Losses(total: 2.963, policy: 2.692, value: 0.122, l2: 0.149)
+[2023-05-16 20:24:30.362] Checkpoint saved: ./checkpointAZ/checkpoint-33
+[2023-05-16 20:24:30.363]
+[2023-05-16 20:26:04.297] Step: 34
+[2023-05-16 20:26:04.299] Collected  6720 states from  60 games, 20.3 states/s. 10.2 states/(s*actor), game length: 112.0
+[2023-05-16 20:26:04.299] Buffer size: 20000. States seen: 228480
+[2023-05-16 20:29:51.242] Losses(total: 2.962, policy: 2.693, value: 0.119, l2: 0.151)
+[2023-05-16 20:29:51.244] Checkpoint saved: ./checkpointAZ/checkpoint-34
+[2023-05-16 20:29:51.244]
+[2023-05-16 20:31:34.848] Step: 35
+[2023-05-16 20:31:34.850] Collected  6720 states from  60 games, 20.3 states/s. 10.2 states/(s*actor), game length: 112.0
+[2023-05-16 20:31:34.850] Buffer size: 20000. States seen: 235200
+[2023-05-16 20:35:35.751] Losses(total: 2.946, policy: 2.683, value: 0.111, l2: 0.152)
+[2023-05-16 20:35:35.751] Checkpoint saved: ./checkpointAZ/checkpoint-35
+[2023-05-16 20:35:35.752]
+[2023-05-16 20:37:27.455] Step: 36
+[2023-05-16 20:37:27.455] Collected  6720 states from  60 games, 19.1 states/s. 9.5 states/(s*actor), game length: 112.0
+[2023-05-16 20:37:27.455] Buffer size: 20000. States seen: 241920
+[2023-05-16 20:41:16.368] Losses(total: 2.924, policy: 2.672, value: 0.099, l2: 0.153)
+[2023-05-16 20:41:16.368] Checkpoint saved: ./checkpointAZ/checkpoint-36
+[2023-05-16 20:41:16.369]
+[2023-05-16 20:42:48.985] Step: 37
+[2023-05-16 20:42:48.985] Collected  6720 states from  60 games, 20.9 states/s. 10.5 states/(s*actor), game length: 112.0
+[2023-05-16 20:42:48.986] Buffer size: 20000. States seen: 248640
+[2023-05-16 20:46:01.690] Losses(total: 2.935, policy: 2.686, value: 0.095, l2: 0.154)
+[2023-05-16 20:46:01.692] Checkpoint saved: ./checkpointAZ/checkpoint-37
+[2023-05-16 20:46:01.694]
+[2023-05-16 20:47:28.963] Step: 38
+[2023-05-16 20:47:28.963] Collected  6720 states from  60 games, 24.0 states/s. 12.0 states/(s*actor), game length: 112.0
+[2023-05-16 20:47:28.963] Buffer size: 20000. States seen: 255360
+[2023-05-16 20:50:58.467] Losses(total: 2.923, policy: 2.664, value: 0.104, l2: 0.154)
+[2023-05-16 20:50:58.467] Checkpoint saved: ./checkpointAZ/checkpoint-38
+[2023-05-16 20:50:58.468]
+[2023-05-16 20:52:22.614] Step: 39
+[2023-05-16 20:52:22.614] Collected  6720 states from  60 games, 22.9 states/s. 11.4 states/(s*actor), game length: 112.0
+[2023-05-16 20:52:22.614] Buffer size: 20000. States seen: 262080
+[2023-05-16 20:55:52.263] Losses(total: 2.942, policy: 2.676, value: 0.111, l2: 0.155)
+[2023-05-16 20:55:52.264] Checkpoint saved: ./checkpointAZ/checkpoint-39
+[2023-05-16 20:55:52.273]
+[2023-05-16 20:57:25.464] Step: 40
+[2023-05-16 20:57:25.466] Collected  6720 states from  60 games, 22.2 states/s. 11.1 states/(s*actor), game length: 112.0
+[2023-05-16 20:57:25.467] Buffer size: 20000. States seen: 268800
+[2023-05-16 21:00:56.330] Losses(total: 2.940, policy: 2.671, value: 0.113, l2: 0.156)
+[2023-05-16 21:00:56.330] Checkpoint saved: ./checkpointAZ/checkpoint-40
+[2023-05-16 21:00:56.331]
+[2023-05-16 21:02:49.978] Step: 41
+[2023-05-16 21:02:49.978] Collected  6720 states from  60 games, 20.7 states/s. 10.4 states/(s*actor), game length: 112.0
+[2023-05-16 21:02:49.979] Buffer size: 20000. States seen: 275520
+[2023-05-16 21:06:41.131] Losses(total: 2.950, policy: 2.685, value: 0.109, l2: 0.156)
+[2023-05-16 21:06:41.131] Checkpoint saved: ./checkpointAZ/checkpoint-41
+[2023-05-16 21:06:41.135]
+[2023-05-16 21:08:37.009] Step: 42
+[2023-05-16 21:08:37.009] Collected  6720 states from  60 games, 19.4 states/s. 9.7 states/(s*actor), game length: 112.0
+[2023-05-16 21:08:37.009] Buffer size: 20000. States seen: 282240
+[2023-05-16 21:12:15.479] Losses(total: 2.952, policy: 2.696, value: 0.099, l2: 0.157)
+[2023-05-16 21:12:15.479] Checkpoint saved: ./checkpointAZ/checkpoint-42
+[2023-05-16 21:12:15.480]
+[2023-05-16 21:13:51.476] Step: 43
+[2023-05-16 21:13:51.476] Collected  6720 states from  60 games, 21.4 states/s. 10.7 states/(s*actor), game length: 112.0
+[2023-05-16 21:13:51.476] Buffer size: 20000. States seen: 288960
+[2023-05-16 21:17:33.415] Losses(total: 2.956, policy: 2.701, value: 0.098, l2: 0.158)
+[2023-05-16 21:17:33.415] Checkpoint saved: ./checkpointAZ/checkpoint-43
+[2023-05-16 21:17:33.416]
+[2023-05-16 21:19:14.409] Step: 44
+[2023-05-16 21:19:14.410] Collected  6720 states from  60 games, 20.8 states/s. 10.4 states/(s*actor), game length: 112.0
+[2023-05-16 21:19:14.411] Buffer size: 20000. States seen: 295680
+[2023-05-16 21:22:52.314] Losses(total: 2.962, policy: 2.691, value: 0.112, l2: 0.159)
+[2023-05-16 21:22:52.314] Checkpoint saved: ./checkpointAZ/checkpoint-44
+[2023-05-16 21:22:52.326]
+[2023-05-16 21:24:28.446] Step: 45
+[2023-05-16 21:24:28.446] Collected  6720 states from  60 games, 21.4 states/s. 10.7 states/(s*actor), game length: 112.0
+[2023-05-16 21:24:28.446] Buffer size: 20000. States seen: 302400
+[2023-05-16 21:28:38.459] Losses(total: 2.967, policy: 2.692, value: 0.117, l2: 0.159)
+[2023-05-16 21:28:38.459] Checkpoint saved: ./checkpointAZ/checkpoint-45
+[2023-05-16 21:28:38.460]
+[2023-05-16 21:30:34.402] Step: 46
+[2023-05-16 21:30:34.402] Collected  6720 states from  60 games, 18.4 states/s. 9.2 states/(s*actor), game length: 112.0
+[2023-05-16 21:30:34.402] Buffer size: 20000. States seen: 309120
+[2023-05-16 21:35:00.660] Losses(total: 2.972, policy: 2.699, value: 0.113, l2: 0.159)
+[2023-05-16 21:35:00.660] Checkpoint saved: ./checkpointAZ/checkpoint-46
+[2023-05-16 21:35:00.661]
+[2023-05-16 21:36:52.897] Step: 47
+[2023-05-16 21:36:52.899] Collected  6720 states from  60 games, 17.8 states/s. 8.9 states/(s*actor), game length: 112.0
+[2023-05-16 21:36:52.899] Buffer size: 20000. States seen: 315840
+[2023-05-16 21:41:04.691] Losses(total: 2.954, policy: 2.674, value: 0.119, l2: 0.161)
+[2023-05-16 21:41:04.693] Checkpoint saved: ./checkpointAZ/checkpoint-47
+[2023-05-16 21:41:04.693]
+[2023-05-16 21:43:00.092] Step: 48
+[2023-05-16 21:43:00.093] Collected  6720 states from  60 games, 18.3 states/s. 9.2 states/(s*actor), game length: 112.0
+[2023-05-16 21:43:00.101] Buffer size: 20000. States seen: 322560
+[2023-05-16 21:47:05.308] Losses(total: 2.951, policy: 2.666, value: 0.123, l2: 0.162)
+[2023-05-16 21:47:05.308] Checkpoint saved: ./checkpointAZ/checkpoint-48
+[2023-05-16 21:47:05.312]
+[2023-05-16 21:49:00.861] Step: 49
+[2023-05-16 21:49:00.861] Collected  6720 states from  60 games, 18.6 states/s. 9.3 states/(s*actor), game length: 112.0
+[2023-05-16 21:49:00.867] Buffer size: 20000. States seen: 329280
+[2023-05-16 21:53:27.554] Losses(total: 2.918, policy: 2.643, value: 0.112, l2: 0.163)
+[2023-05-16 21:53:27.555] Checkpoint saved: ./checkpointAZ/checkpoint-49
+[2023-05-16 21:53:27.558]
+[2023-05-16 21:55:27.691] Step: 50
+[2023-05-16 21:55:27.691] Collected  6720 states from  60 games, 17.4 states/s. 8.7 states/(s*actor), game length: 112.0
+[2023-05-16 21:55:27.691] Buffer size: 20000. States seen: 336000
+[2023-05-16 21:59:26.324] Losses(total: 2.923, policy: 2.653, value: 0.107, l2: 0.163)
+[2023-05-16 21:59:26.326] Checkpoint saved: ./checkpointAZ/checkpoint-50
+[2023-05-16 21:59:26.327]
+[2023-05-16 22:01:34.755] Step: 51
+[2023-05-16 22:01:34.757] Collected  6720 states from  60 games, 18.3 states/s. 9.2 states/(s*actor), game length: 112.0
+[2023-05-16 22:01:34.758] Buffer size: 20000. States seen: 342720
+[2023-05-16 22:05:39.069] Losses(total: 2.925, policy: 2.651, value: 0.111, l2: 0.163)
+[2023-05-16 22:05:39.070] Checkpoint saved: ./checkpointAZ/checkpoint-51
+[2023-05-16 22:05:39.070]
+[2023-05-16 22:07:27.315] Step: 52
+[2023-05-16 22:07:27.315] Collected  6720 states from  60 games, 19.1 states/s. 9.5 states/(s*actor), game length: 112.0
+[2023-05-16 22:07:27.315] Buffer size: 20000. States seen: 349440
+[2023-05-16 22:11:43.283] Losses(total: 2.935, policy: 2.662, value: 0.109, l2: 0.163)
+[2023-05-16 22:11:43.284] Checkpoint saved: ./checkpointAZ/checkpoint-52
+[2023-05-16 22:11:43.285]
+[2023-05-16 22:13:22.871] Step: 53
+[2023-05-16 22:13:22.871] Collected  6720 states from  60 games, 18.9 states/s. 9.4 states/(s*actor), game length: 112.0
+[2023-05-16 22:13:22.871] Buffer size: 20000. States seen: 356160
+[2023-05-16 22:17:29.698] Losses(total: 2.943, policy: 2.668, value: 0.112, l2: 0.163)
+[2023-05-16 22:17:29.699] Checkpoint saved: ./checkpointAZ/checkpoint-53
+[2023-05-16 22:17:29.701]
+[2023-05-16 22:19:05.356] Step: 54
+[2023-05-16 22:19:05.356] Collected  6720 states from  60 games, 19.6 states/s. 9.8 states/(s*actor), game length: 112.0
+[2023-05-16 22:19:05.356] Buffer size: 20000. States seen: 362880
+[2023-05-16 22:22:27.559] Losses(total: 2.925, policy: 2.657, value: 0.104, l2: 0.163)
+[2023-05-16 22:22:27.559] Checkpoint saved: ./checkpointAZ/checkpoint-54
+[2023-05-16 22:22:27.560]
+[2023-05-16 22:23:50.394] Step: 55
+[2023-05-16 22:23:50.394] Collected  6720 states from  60 games, 23.6 states/s. 11.8 states/(s*actor), game length: 112.0
+[2023-05-16 22:23:50.394] Buffer size: 20000. States seen: 369600
+[2023-05-16 22:27:04.471] Losses(total: 2.916, policy: 2.650, value: 0.103, l2: 0.164)
+[2023-05-16 22:27:04.472] Checkpoint saved: ./checkpointAZ/checkpoint-55
+[2023-05-16 22:27:04.473]
+[2023-05-16 22:28:59.324] Step: 56
+[2023-05-16 22:28:59.326] Collected  6720 states from  60 games, 21.8 states/s. 10.9 states/(s*actor), game length: 112.0
+[2023-05-16 22:28:59.328] Buffer size: 20000. States seen: 376320
+[2023-05-16 22:33:01.955] Losses(total: 2.903, policy: 2.631, value: 0.107, l2: 0.165)
+[2023-05-16 22:33:01.955] Checkpoint saved: ./checkpointAZ/checkpoint-56
+[2023-05-16 22:33:01.963]
+[2023-05-16 22:34:36.050] Step: 57
+[2023-05-16 22:34:36.050] Collected  6720 states from  60 games, 20.0 states/s. 10.0 states/(s*actor), game length: 112.0
+[2023-05-16 22:34:36.050] Buffer size: 20000. States seen: 383040
+[2023-05-16 22:38:07.036] Losses(total: 2.906, policy: 2.636, value: 0.105, l2: 0.166)
+[2023-05-16 22:38:07.036] Checkpoint saved: ./checkpointAZ/checkpoint-57
+[2023-05-16 22:38:07.038]
+[2023-05-16 22:39:34.548] Step: 58
+[2023-05-16 22:39:34.549] Collected  6720 states from  60 games, 22.5 states/s. 11.3 states/(s*actor), game length: 112.0
+[2023-05-16 22:39:34.549] Buffer size: 20000. States seen: 389760
+[2023-05-16 22:43:00.678] Losses(total: 2.935, policy: 2.653, value: 0.116, l2: 0.166)
+[2023-05-16 22:43:00.679] Checkpoint saved: ./checkpointAZ/checkpoint-58
+[2023-05-16 22:43:00.680]
+[2023-05-16 22:44:32.956] Step: 59
+[2023-05-16 22:44:32.956] Collected  6720 states from  60 games, 22.5 states/s. 11.3 states/(s*actor), game length: 112.0
+[2023-05-16 22:44:32.956] Buffer size: 20000. States seen: 396480
+[2023-05-16 22:47:48.458] Losses(total: 2.904, policy: 2.643, value: 0.094, l2: 0.167)
+[2023-05-16 22:47:48.459] Checkpoint saved: ./checkpointAZ/checkpoint-59
+[2023-05-16 22:47:48.460]
+[2023-05-16 22:49:34.852] Step: 60
+[2023-05-16 22:49:34.852] Collected  6720 states from  60 games, 22.3 states/s. 11.1 states/(s*actor), game length: 112.0
+[2023-05-16 22:49:34.853] Buffer size: 20000. States seen: 403200
+[2023-05-16 22:53:21.374] Losses(total: 2.918, policy: 2.655, value: 0.096, l2: 0.167)
+[2023-05-16 22:53:21.374] Checkpoint saved: ./checkpointAZ/checkpoint-60
+[2023-05-16 22:53:21.375]
+[2023-05-16 22:54:52.715] Step: 61
+[2023-05-16 22:54:52.715] Collected  6720 states from  60 games, 21.1 states/s. 10.6 states/(s*actor), game length: 112.0
+[2023-05-16 22:54:52.715] Buffer size: 20000. States seen: 409920
+[2023-05-16 22:58:35.287] Losses(total: 2.930, policy: 2.652, value: 0.111, l2: 0.167)
+[2023-05-16 22:58:35.287] Checkpoint saved: ./checkpointAZ/checkpoint-61
+[2023-05-16 22:58:35.288]
+[2023-05-16 23:00:07.722] Step: 62
+[2023-05-16 23:00:07.722] Collected  6720 states from  60 games, 21.3 states/s. 10.7 states/(s*actor), game length: 112.0
+[2023-05-16 23:00:07.722] Buffer size: 20000. States seen: 416640
+[2023-05-16 23:03:43.630] Losses(total: 2.904, policy: 2.636, value: 0.099, l2: 0.169)
+[2023-05-16 23:03:43.630] Checkpoint saved: ./checkpointAZ/checkpoint-62
+[2023-05-16 23:03:43.631]
+[2023-05-16 23:04:46.448] learner exiting

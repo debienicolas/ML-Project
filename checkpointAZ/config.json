@@ -1,0 +1,31 @@
+{
+  "actors": 2,
+  "checkpoint_freq": 1,
+  "eval_levels": 7,
+  "evaluation_window": 40,
+  "evaluators": 1,
+  "game": "dots_and_boxes(num_rows=7,num_cols=7)",
+  "learning_rate": 0.001,
+  "max_simulations": 25,
+  "max_steps": 0,
+  "nn_depth": 3,
+  "nn_model": "conv2d",
+  "nn_width": 128,
+  "observation_shape": [
+    3,
+    64,
+    3
+  ],
+  "output_size": 112,
+  "path": "./checkpointAZ/",
+  "policy_alpha": 1.0,
+  "policy_epsilon": 0.25,
+  "quiet": true,
+  "replay_buffer_reuse": 3,
+  "replay_buffer_size": 20000,
+  "temperature": 1.0,
+  "temperature_drop": 15,
+  "train_batch_size": 8,
+  "uct_c": 2,
+  "weight_decay": 0.0001
+}
