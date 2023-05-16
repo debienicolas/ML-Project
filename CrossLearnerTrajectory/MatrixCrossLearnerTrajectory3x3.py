@@ -116,7 +116,12 @@ for prob in probab:
             
             
         probabilities[cur_episode + 1,: ]= agents[0].getProbs()
+        print(agents[0].getProbs())
 
     ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)
+    points = np.zeros(( 1,3))
+    points[0,:] = [1/16,10/16,5/16]
+    print(points[0,:])
+    ax.scatter(points, color = "green")
 
 plt.show()
