@@ -14,7 +14,7 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(1e4)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(1e5)         # Number of episodes for training the players. (for learning)
 delta = 0.001
 pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
     [[0,-5,10],  # Player 1
@@ -79,6 +79,8 @@ probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
 probab = [[[0.75,0.15,1],[0.75,0.15,1]] ] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
+probab = [[[1,1,1],[1,1,1]] ] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
+
 probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
 
@@ -116,12 +118,10 @@ for prob in probab:
             
             
         probabilities[cur_episode + 1,: ]= agents[0].getProbs()
-        print(agents[0].getProbs())
 
     ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)
     points = np.zeros(( 1,3))
     points[0,:] = [1/16,10/16,5/16]
-    print(points[0,:])
     ax.scatter(points, color = "green")
 
 plt.show()

@@ -15,11 +15,11 @@ import collections
 ## Set up the parameters
 num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
 pay_off_tensor = np.array([             # The pay-off matrix
-    [[-1,1],  # Player 1
-     [1,-1]],  
-    [[-1,1],  # Player 2
-     [1,-1]]])
-kappa = 10
+    [[3,0],  # Player 1
+     [0,2]],  
+    [[2,0],  # Player 2
+     [0,3]]])
+kappa = 20
 
 game_type = pyspiel.GameType(
     "MatrixGame",
