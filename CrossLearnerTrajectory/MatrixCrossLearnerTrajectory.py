@@ -14,8 +14,8 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(3*1e5)         # Number of episodes for training the players. (for learning)
-delta = 0.0001
+num_train_episodes = int(2*1e5)         # Number of episodes for training the players. (for learning)
+delta = 0.0005
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
      [0,2]],  
@@ -87,22 +87,56 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
-ax.set_title("Prisoners Dilemma")
+#ax.set_title("Prisoners Dilemma")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
 ## Plot the vector field
 ax.quiver(dyn)
-
+ax.set_xlim = [-.1,1.1]
+ax.set_ylim = [-.1,1.1]
 
 probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
-probab = [[[0.85,0.15],[0.85,0.15]], [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
+probab = [[[0.5,0.5],[0.85,0.15]], [[0.15,0.85],[0.75,0.25]],[[0.85,0.15],[0.3,0.70]],[[0.5,0.5],[0.5,0.5]]]
 probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
 
+## Battle of the sexes
+""" paretoPoints = np.zeros(( 2,2))
+paretoPoints[0,:] = [0,1]
+paretoPoints[1,:] = [0,1]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,3))
+nash[:,:2] = paretoPoints
+nash[:,2] = [.6,.4]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+ """
 
-for prob in probab_prisonDilemma:
+## Prisoners dilemma
+paretoPoints = np.zeros(( 2,3))
+paretoPoints[0,:] = [1,0,1]
+paretoPoints[1,:] = [1,1,0]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,1))
+nash[0,:] = [0]
+nash[1,:] = [0]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+
+
+""" ## Dispersion game
+paretoPoints = np.zeros(( 2,2))
+paretoPoints[0,:] = [1,0]
+paretoPoints[1,:] = [0,1]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,3))
+nash[:,:2] = paretoPoints
+nash[:,2] = [.5,.5]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
+
+
+
+for prob in probab:
 
     ## Set up the players: Cross-learning agents
     agents = [CrossLearner(num_actions, player_id = 0, probs = prob[0], delta=delta),
@@ -134,5 +168,8 @@ for prob in probab_prisonDilemma:
         probabilities[:,cur_episode + 1] = [agent.getProbs(0) for agent in agents]
 
     ax.plot(probabilities[0,:], probabilities[1,:],color="red",alpha=0.5,linewidth=3)
+
+    ax.scatter(probabilities[0,0], probabilities[1,0],color="red",alpha=0.5)
+
 
 plt.show()

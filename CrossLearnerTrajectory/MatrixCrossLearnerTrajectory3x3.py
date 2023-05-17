@@ -14,16 +14,15 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(1e5)         # Number of episodes for training the players. (for learning)
-delta = 0.001
+num_train_episodes = int(2*1e5)         # Number of episodes for training the players. (for learning)
+delta = 0.0005
 pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
-    [[0,-5,10],  # Player 1
-     [5,0,-1],
-     [-10,1,0]],
-    [[0,5,-10],  # Player 2
-     [-5,0,1],
-     [10,-1,0]]])            
-
+    [[0,-.25,.5],  # Player 1
+     [.25,0,-.05],
+     [-.5,.05,0]],
+    [[0,.25,-.5],  # Player 2
+     [-.25,0,.05],
+     [.5,-.05,0]]])  
 ## Set up the game
 # Normalize the pay-off tensor (needed for cross learning)
 pay_off_tensor = pay_off_tensor_RockPaperScissors
@@ -70,7 +69,7 @@ dyn = dynamics.SinglePopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="3x3")
-ax.set_title("Rock-Paper-Scissors")
+#ax.set_title("Rock-Paper-Scissors")
 ## Plot the vector field
 ax.quiver(dyn)
 ax.set_labels(["R","P","S"])
@@ -78,8 +77,7 @@ ax.set_labels(["R","P","S"])
 probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
-probab = [[[0.75,0.15,1],[0.75,0.15,1]] ] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
-probab = [[[1,1,1],[1,1,1]] ] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
+probab = [[[0.75,0.15,1],[0.75,0.15,1]] , [[1,1,1],[1,1,1]] , [[0.1,0.3,1], [0.1,0.3,1]]] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
 
 probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
@@ -96,6 +94,8 @@ for prob in probab:
     ## Store the probabilities of each episode (needed for the trajectory plot)
     probabilities = np.zeros(( num_train_episodes+1,3))
     probabilities[0,:] = agents[0].getProbs()
+    start = np.zeros((1,3))
+    start[0,:] = probabilities[0]
 
     ## Train the agents
     # For each episode, do:
@@ -120,8 +120,17 @@ for prob in probab:
         probabilities[cur_episode + 1,: ]= agents[0].getProbs()
 
     ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)
-    points = np.zeros(( 1,3))
-    points[0,:] = [1/16,10/16,5/16]
-    ax.scatter(points, color = "green")
+    ax.scatter(start,color="red",alpha=0.5, linewidth=6)
+
+
+
+paretoPoints = np.zeros(( 3,3))
+paretoPoints[0,:] = [1,0,0]
+paretoPoints[1,:] = [0,0,1]
+paretoPoints[2,:] = [0,1,0]
+ax.scatter(paretoPoints, s=300, color = "green")
+nash = np.zeros(( 1,3))
+nash[0,:] = [1/16,10/16,5/16]
+ax.scatter(nash, s=100, marker = "d", color = "orange")
 
 plt.show()
