@@ -14,7 +14,7 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(2*1e5)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(2*1e5)        
 delta = 0.0005
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
@@ -28,13 +28,13 @@ pay_off_tensor_prisoners_dilemma = np.array([
     [[-1,0],  # Player 2
      [-4,-3]]])    
 
-pay_off_tensor_dispersion_game= np.array([             # The pay-off matrix
+pay_off_tensor_dispersion_game= np.array([             
     [[-1,1],  # Player 1
      [1,-1]],  
     [[-1,1],  # Player 2
      [1,-1]]])
 
-pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
+pay_off_tensor_RockPaperScissors = np.array([            
     [[0,-5,10],  # Player 1
      [5,0,-1],
      [-10,1,0]],
@@ -73,7 +73,7 @@ game = pyspiel.MatrixGame(
 )
 
 
-## Set up the environment (cfr a state of the game, but more elaborate)
+## Set up the environment 
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
@@ -96,12 +96,10 @@ ax.quiver(dyn)
 probs1 = [0.15,0.85]
 probs2 = [0.2,0.8]
 
-probab = [[[0.5,0.5],[0.85,0.15]], [[0.15,0.85],[0.75,0.25]],[[0.85,0.15],[0.3,0.70]],[[0.5,0.5],[0.5,0.5]]]
-probab_prisonDilemma = [[[0.85,0.15],[0.15,0.85]], [[0.15,0.85],[0.85,0.15]],[[0.65,0.35],[0.4,0.6]],[[0.35,0.65],[0.65,0.35]],[[0.85,0.15],[0.85,0.15]]]
 
-
-## Battle of the sexes
-""" paretoPoints = np.zeros(( 2,2))
+## Plot the Nash equilibria and Pareto optimality points
+""" ## Battle of the sexes
+paretoPoints = np.zeros(( 2,2))
 paretoPoints[0,:] = [0,1]
 paretoPoints[1,:] = [0,1]
 ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
@@ -111,8 +109,8 @@ nash[:,2] = [.6,.4]
 ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
 
 
-## Prisoners dilemma
-""" paretoPoints = np.zeros(( 2,3))
+""" ## Prisoners dilemma
+paretoPoints = np.zeros(( 2,3))
 paretoPoints[0,:] = [1,0,1]
 paretoPoints[1,:] = [1,1,0]
 ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
@@ -122,7 +120,7 @@ nash[1,:] = [0]
 ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
 
 
-## Dispersion game
+""" ## Dispersion game
 paretoPoints = np.zeros(( 2,2))
 paretoPoints[0,:] = [1,0]
 paretoPoints[1,:] = [0,1]
@@ -130,12 +128,12 @@ ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
 nash = np.zeros(( 2,3))
 nash[:,:2] = paretoPoints
 nash[:,2] = [.5,.5]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")""" 
 
 
-
+# Initialize the different probabilities for the learner.
+probab = [[[0.5,0.5],[0.85,0.15]], [[0.15,0.85],[0.75,0.25]],[[0.85,0.15],[0.3,0.70]],[[0.5,0.5],[0.5,0.5]]]
 for prob in probab:
-
     ## Set up the players: Cross-learning agents
     agents = [CrossLearner(num_actions, player_id = 0, probs = prob[0], delta=delta),
             CrossLearner(num_actions, player_id = 1, probs = prob[1], delta=delta)]
@@ -166,7 +164,6 @@ for prob in probab:
         probabilities[:,cur_episode + 1] = [agent.getProbs(0) for agent in agents]
 
     ax.plot(probabilities[0,:], probabilities[1,:],color="red",alpha=0.5,linewidth=3)
-
     ax.scatter(probabilities[0,0], probabilities[1,0],color="red",alpha=0.5)
 
 

@@ -17,11 +17,10 @@ import numpy as np
 
 
 ## Set up the parameters
-num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
-epsilon_schedule = .1                   # The epsilon for the epsilon-greedy step.
+num_train_episodes = int(1000)        
 step_size = .01
 
-pay_off_tensor = np.array([             # The pay-off matrix
+pay_off_tensor = np.array([             
     [[0,-.25,.5],  # Player 1
      [.25,0,-.05],
      [-.5,.05,0]],
@@ -66,13 +65,6 @@ num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
 
 
-
-
-
-
-
-
-
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
 
@@ -88,39 +80,7 @@ ax.set_ylabel("Player 2")
 ## Plot the vector field
 ax.quiver(dyn)
 
-""" ## Battle of the sexes
-paretoPoints = np.zeros(( 2,2))
-paretoPoints[0,:] = [0,1]
-paretoPoints[1,:] = [0,1]
-ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
-nash = np.zeros(( 2,3))
-nash[:,:2] = paretoPoints
-nash[:,2] = [.6,.4]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
-
-
-## Prisoners dilemma
-""" paretoPoints = np.zeros(( 2,3))
-paretoPoints[0,:] = [1,0,1]
-paretoPoints[1,:] = [1,1,0]
-ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
-nash = np.zeros(( 2,1))
-nash[0,:] = [0]
-nash[1,:] = [0]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
-
-
-## Dispersion game
-""" paretoPoints = np.zeros(( 2,2))
-paretoPoints[0,:] = [1,0]
-paretoPoints[1,:] = [0,1]
-ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
-nash = np.zeros(( 2,3))
-nash[:,:2] = paretoPoints
-nash[:,2] = [.5,.5]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
-
-
+## Plot the Nash equilibria and Pareto optimality points
 paretoPoints = np.zeros(( 3,3))
 paretoPoints[0,:] = [1,0,0]
 paretoPoints[1,:] = [0,0,1]
@@ -132,20 +92,10 @@ ax.scatter(nash, s=100, marker = "d", color = "orange")
 ax.set_labels(["R","P","S"])
 
 
-
-
-
-
-
-
-
-
-
+# Initialize the different Q-values for the learner.
 Startpoints = [[{0: 0, 1: 0,2:0},{0: 0, 1: 0,2:0}]]#,[{0: 0.02, 1: .01,2:.012},{0: 0.02, 1: .01,2:.012}]]
 for Qs in Startpoints:
-
     print(Qs)
-
     ## Set up the players: Qepsilon-greedy Q-learners
     agents = [tabular_qlearner.QLearner(
         player_id=idx,
@@ -153,12 +103,10 @@ for Qs in Startpoints:
         epsilon_schedule=epsilon_schedule,
         step_size=step_size
     ) for idx in range(num_players)]
-
-    ## different Q values 
     for i in range(len(agents)):
         agents[i]._q_values['[0.0]']  = Qs[i]
 
-    ## A matrix with the probabilities of each episode to plot in the end (the trajectory)
+    ## The probabilities of each episode to plot in the end (the trajectory)
     probabilities = np.zeros((num_train_episodes,3))
 
 

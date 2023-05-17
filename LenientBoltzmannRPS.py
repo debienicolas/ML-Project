@@ -14,10 +14,10 @@ import collections
 
 ## Set up the parameters
 kappa = 10
-num_train_episodes = int(50000)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(50000)      
 step_size = 0.001
 
-pay_off_tensor = np.array([             # The pay-off matrix
+pay_off_tensor = np.array([             
     [[0,-.25,.5],  # Player 1
      [.25,0,-.05],
      [-.5,.05,0]],
@@ -52,7 +52,7 @@ game = pyspiel.MatrixGame(
     list(pay_off_tensor)[1]  # col player utilities
 )
 
-## Set up the environment (cfr a state of the game, but more elaborate)
+## Set up the environment 
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
@@ -62,23 +62,23 @@ agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_s
           for idx in range(num_players)]
 
 
-
-    ## Get the pay-off tensor
+## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
 
-    ## Set up the replicator dynamics
+## Set up the replicator dynamics
 dyn = dynamics.SinglePopulationDynamics(payoff_tensor, dynamics.replicator)
     
-    ## Set up the plot
+## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="3x3")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
 ax.set_labels(["R","P","S"])
 
-    ## Plot the vector field
+## Plot the vector field
 ax.quiver(dyn)
 
+## Plot the Nash equilibria and Pareto optimality points
 paretoPoints = np.zeros(( 3,3))
 paretoPoints[0,:] = [1,0,0]
 paretoPoints[1,:] = [0,0,1]
@@ -89,17 +89,12 @@ nash[0,:] = [1/16,10/16,5/16]
 ax.scatter(nash, s=100, marker = "d", color = "orange")
 
 
+# Initialize the different Q-values for the learner.
 Startpoints = [[{0: 0, 1: 0,2:.4},{0: 0, 1: 0,2:.4}],[{0: 0.02, 1: .01,2:.012},{0: 0.02, 1: .01,2:.012}]]
-
 for Qs in Startpoints:
     print(Qs)
-
-
     agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.0001)
           for idx in range(num_players)]
-
-
-    ## different Q values 
     for i in range(len(agents)):
         agents[i]._q_values['[0.0]']  = Qs[i]
 

@@ -13,7 +13,7 @@ import collections
 
 
 ## Set up the parameters
-num_train_episodes = int(100000)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(100000)        
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
      [0,2]],  
@@ -28,13 +28,13 @@ pay_off_tensor_prisoners_dilemma = np.array([
     [[-1,0],  # Player 2
      [-4,-3]]])    
 
-pay_off_tensor_dispersion_game= np.array([             # The pay-off matrix
+pay_off_tensor_dispersion_game= np.array([        
     [[-1,1],  # Player 1
      [1,-1]],  
     [[-1,1],  # Player 2
      [1,-1]]])
 
-pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
+pay_off_tensor_RockPaperScissors = np.array([          
     [[0,-5,10],  # Player 1
      [5,0,-1],
      [-10,1,0]],
@@ -43,9 +43,7 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
      [10,-1,0]]])            
 
 ## Set up the game
-# Normalize the pay-off tensor (needed for cross learning)
 pay_off_tensor = pay_off_tensor_battle_of_the_sexes
-#pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "MatrixGame",
     "MatrixGame",
@@ -72,7 +70,7 @@ game = pyspiel.MatrixGame(
     list(pay_off_tensor)[1]  # col player utilities
 )
 
-## Set up the environment (cfr a state of the game, but more elaborate)
+## Set up the environment 
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
@@ -94,7 +92,8 @@ ax.set_ylabel("Player 2")
 ## Plot the vector field
 ax.quiver(dyn)
 
-## Battle of the sexes
+## Plot the Nash equilibria and Pareto optimality points
+""" ## Battle of the sexes
 paretoPoints = np.zeros(( 2,2))
 paretoPoints[0,:] = [0,1]
 paretoPoints[1,:] = [0,1]
@@ -102,7 +101,7 @@ ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
 nash = np.zeros(( 2,3))
 nash[:,:2] = paretoPoints
 nash[:,2] = [.6,.4]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
 
 
 """ ## Prisoners dilemma
@@ -127,20 +126,13 @@ nash[:,2] = [.5,.5]
 ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
  """
 
-
-
-
-
+# Initialize the different Q-values for the learner.
 Startpoints = [[{0: 0, 1: 0},{0: 0, 1: 0}],[{0: -.01, 1: 0},{0: .015, 1: 0}], [{0: 0, 1: 0.01}, {0: 0, 1: 0.0075}], [{0: .02, 1: 0.005},{0: .01, 1: .01}]]
 
 for Qs in Startpoints:
-
     print(Qs)
-
     agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=step_size)
                 for idx in range(num_players)]
-
-    ## different Q values 
     for i in range(len(agents)):
         agents[i]._q_values['[0.0]']  = Qs[i]
 
@@ -164,7 +156,7 @@ for Qs in Startpoints:
         # Each agent should choose an action
         agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
 
-        # Try kappa times to exectute the action in order to find the highest reward.
+        # Try kappa times to execute the action in order to find the highest reward.
         while (index<kappa):
             time_step = env.step([x.action for x in agent_output])
             timesteps[index] = time_step
