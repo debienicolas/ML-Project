@@ -13,7 +13,7 @@ import collections
 
 
 ## Set up the parameters
-num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(100000)         # Number of episodes for training the players. (for learning)
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
      [0,2]],  
@@ -44,7 +44,7 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
 
 ## Set up the game
 # Normalize the pay-off tensor (needed for cross learning)
-pay_off_tensor = pay_off_tensor_dispersion_game
+pay_off_tensor = pay_off_tensor_battle_of_the_sexes
 #pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "MatrixGame",

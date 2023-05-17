@@ -13,9 +13,9 @@ import collections
 
 
 ## Set up the parameters
-kappa = 1
-num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
-step_size = 0.0001
+kappa = 10
+num_train_episodes = int(50000)         # Number of episodes for training the players. (for learning)
+step_size = 0.001
 
 pay_off_tensor = np.array([             # The pay-off matrix
     [[0,-.25,.5],  # Player 1
@@ -74,6 +74,7 @@ fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="3x3")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
+ax.set_labels(["R","P","S"])
 
     ## Plot the vector field
 ax.quiver(dyn)
@@ -86,7 +87,9 @@ ax.scatter(paretoPoints, s=300, color = "green")
 nash = np.zeros(( 1,3))
 nash[0,:] = [1/16,10/16,5/16]
 ax.scatter(nash, s=100, marker = "d", color = "orange")
-Startpoints = [[{0: 0, 1: 0,2:0},{0: 0, 1: 0,2:0}]] #,[{0: 0, 1: .01,2:-.01},{0: 0, 1: .01,2:-.01}],[{0: 0, 1: 0,2:.02},{0: 0, 1: 0,2:.02}]]
+
+
+Startpoints = [[{0: 0, 1: 0,2:.4},{0: 0, 1: 0,2:.4}],[{0: 0.02, 1: .01,2:.012},{0: 0.02, 1: .01,2:.012}]]
 
 for Qs in Startpoints:
     print(Qs)
@@ -127,14 +130,12 @@ for Qs in Startpoints:
             
 
         # Add the probabilities of the actions to the tensor in order to plot them in the end.
-        probabilities[cur_episode//kappa-1,:] = agent_output[0].probs[0]
+        probabilities[cur_episode//kappa-1,:] = agent_output[0].probs
 
         # Let the players learn from the highest reward.
         for player_id in range(num_players):
             time_step = timesteps[np.argmax(cache[player_id,:])]
             agents[player_id].step(time_step)
-        print(agents[0]._q_values)
-        print(probabilities[cur_episode//kappa-1,:])
         
     ## The learning is done
     ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)

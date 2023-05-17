@@ -19,6 +19,7 @@ import numpy as np
 ## Set up the parameters
 num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
 epsilon_schedule = .1                   # The epsilon for the epsilon-greedy step.
+step_size = .01
 
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
@@ -48,7 +49,7 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
 
 
 ## Set up the game
-payoff_tensor = pay_off_tensor_prisoners_dilemma
+payoff_tensor = pay_off_tensor_battle_of_the_sexes
 game_type = pyspiel.GameType(
     "battleOfTheSexes",
     "Battle Of The Sexes",
@@ -84,38 +85,13 @@ env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
 
-## Set up the players: Qepsilon-greedy Q-learners
-agents = [tabular_qlearner.QLearner(
-    player_id=idx,
-    num_actions=num_actions,
-    epsilon_schedule=epsilon_schedule,
-    step_size=0.01
-) for idx in range(num_players)]
-
-## A matrix with the probabilities of each episode to plot in the end (the trajectory)
-probabilities = np.zeros((num_players, num_train_episodes))
 
 
-## Train the agents
-# For each episode, do:
-for cur_episode in range(num_train_episodes):
-    # Get the initial state of the game.
-    time_step = env.reset()
-    # As long as the game has not finished, do:
-    while not time_step.last():
-        # Each agent should choose an action and learn from the state it is in (time_step)
-        agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
-        print(agent_output[0])
-        probabilities[:,cur_episode] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
-        # Do the chosen actions and get the new state.
-        time_step = env.step([x.action for x in agent_output])
 
-    # Episode is done
-    # Let each player learn from the outcome of the episode.
-    for agent in agents:
-        agent.step(time_step)
-                
-print(probabilities)
+
+
+
+
 
 ## Get the pay-off tensor
 payoff_tensor = utils.game_payoffs_array(game)
@@ -126,11 +102,101 @@ dyn = dynamics.MultiPopulationDynamics(payoff_tensor, dynamics.replicator)
 ## Set up the plot
 fig = plt.figure(figsize = (4,4))
 ax = fig.add_subplot(111,projection="2x2")
-ax.set_title("Battle of the sexes")
+#ax.set_title("Prisoners Dilemma")
 ax.set_xlabel("Player 1")
 ax.set_ylabel("Player 2")
-
 ## Plot the vector field
 ax.quiver(dyn)
-ax.plot(probabilities[0,:], probabilities[1,:],color="green",alpha=0.5,linewidth=2)
+
+## Battle of the sexes
+paretoPoints = np.zeros(( 2,2))
+paretoPoints[0,:] = [0,1]
+paretoPoints[1,:] = [0,1]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,3))
+nash[:,:2] = paretoPoints
+nash[:,2] = [.6,.4]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+
+
+## Prisoners dilemma
+""" paretoPoints = np.zeros(( 2,3))
+paretoPoints[0,:] = [1,0,1]
+paretoPoints[1,:] = [1,1,0]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,1))
+nash[0,:] = [0]
+nash[1,:] = [0]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
+
+
+## Dispersion game
+""" paretoPoints = np.zeros(( 2,2))
+paretoPoints[0,:] = [1,0]
+paretoPoints[1,:] = [0,1]
+ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
+nash = np.zeros(( 2,3))
+nash[:,:2] = paretoPoints
+nash[:,2] = [.5,.5]
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
+
+
+
+
+
+
+
+
+
+
+
+
+
+Startpoints = [[{0: 0, 1: 0},{0: 0, 1: 0}]]#,[{0: -.01, 1: 0},{0: .015, 1: 0}], [{0: 0, 1: 0.01}, {0: 0, 1: 0.0075}], [{0: .0051, 1: 0.005},{0: .01, 1: .01}]]
+
+for Qs in Startpoints:
+
+    print(Qs)
+
+    ## Set up the players: Qepsilon-greedy Q-learners
+    agents = [tabular_qlearner.QLearner(
+        player_id=idx,
+        num_actions=num_actions,
+        epsilon_schedule=epsilon_schedule,
+        step_size=step_size
+    ) for idx in range(num_players)]
+
+    ## different Q values 
+    for i in range(len(agents)):
+        agents[i]._q_values['[0.0]']  = Qs[i]
+
+    ## A matrix with the probabilities of each episode to plot in the end (the trajectory)
+    probabilities = np.zeros((num_players, num_train_episodes))
+
+
+    ## Train the agents
+    # For each episode, do:
+    for cur_episode in range(num_train_episodes):
+        # Get the initial state of the game.
+        time_step = env.reset()
+        # As long as the game has not finished, do:
+        while not time_step.last():
+            # Each agent should choose an action and learn from the state it is in (time_step)
+            agent_output = [agents[player_id].step(time_step, is_evaluation=False) for player_id in range(num_players)]
+            probabilities[:,cur_episode] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
+            # Do the chosen actions and get the new state.
+            time_step = env.step([x.action for x in agent_output])
+
+        # Episode is done
+        # Let each player learn from the outcome of the episode.
+        for agent in agents:
+            agent.step(time_step)
+                    
+
+    ## Set up the plot
+    ax.plot(probabilities[0,:], probabilities[1,:],color="red",alpha=0.5,linewidth=3)
+    ax.scatter(probabilities[0,0], probabilities[1,0],color="red",alpha=0.5)
+
+
+
 plt.show()
