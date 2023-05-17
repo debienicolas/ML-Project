@@ -34,19 +34,16 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
     # Set boolean to False
     inTree = False
 
-    for stateString in symmetricalStates(key,num_rows, num_cols):
-        if (stateString in transpTable.keys()):
-            if inTree == False:
-                inTree = True
-                k = transpTable[stateString]
-                if (len(score) in k.keys()):
-                    # Current state and score already found
-                    return k[len(score)]
-    
-    if not inTree:
+    symmetries = order(symmetricalStates(key,num_rows, num_cols))
+    if (symmetries[0] in TranspTable.keys()):
+        k = transpTable[symmetries[0]]
+        if (len(score) in k.keys()):
+             # Current state and score already found
+             return k[len(score)]
+    else:
         # Current state not found,
         # so initialise a new dictionary for this state.
-        transpTable[key] = dict()
+        transpTable[symmetries[0]] = dict()
         k = transpTable[key] 
 
     player = state.current_player()
