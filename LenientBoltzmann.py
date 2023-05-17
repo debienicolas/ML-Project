@@ -13,14 +13,14 @@ import collections
 
 
 ## Set up the parameters
-num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
+num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
 pay_off_tensor_battle_of_the_sexes = np.array([            
     [[3,0],  # Player 1
      [0,2]],  
     [[2,0],  # Player 2
      [0,3]]])   
-kappa = 20
-step_size = 0.0001
+kappa = 10
+step_size = 0.001
 
 pay_off_tensor_prisoners_dilemma = np.array([            
     [[-1,-4],  # Player 1
@@ -44,8 +44,8 @@ pay_off_tensor_RockPaperScissors = np.array([             # The pay-off matrix
 
 ## Set up the game
 # Normalize the pay-off tensor (needed for cross learning)
-pay_off_tensor = pay_off_tensor_prisoners_dilemma
-pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
+pay_off_tensor = pay_off_tensor_dispersion_game
+#pay_off_tensor = (pay_off_tensor-np.min(pay_off_tensor))/(np.max(pay_off_tensor)-np.min(pay_off_tensor))
 game_type = pyspiel.GameType(
     "MatrixGame",
     "MatrixGame",
@@ -94,7 +94,7 @@ ax.set_ylabel("Player 2")
 ## Plot the vector field
 ax.quiver(dyn)
 
-""" ## Battle of the sexes
+## Battle of the sexes
 paretoPoints = np.zeros(( 2,2))
 paretoPoints[0,:] = [0,1]
 paretoPoints[1,:] = [0,1]
@@ -102,10 +102,10 @@ ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
 nash = np.zeros(( 2,3))
 nash[:,:2] = paretoPoints
 nash[:,2] = [.6,.4]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
 
 
-## Prisoners dilemma
+""" ## Prisoners dilemma
 paretoPoints = np.zeros(( 2,3))
 paretoPoints[0,:] = [1,0,1]
 paretoPoints[1,:] = [1,1,0]
@@ -113,7 +113,7 @@ ax.scatter(paretoPoints[0,:], paretoPoints[1,:], s=300, color = "green")
 nash = np.zeros(( 2,1))
 nash[0,:] = [0]
 nash[1,:] = [0]
-ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
+ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange") """
 
 
 """ ## Dispersion game
@@ -134,7 +134,7 @@ ax.scatter(nash[0,:], nash[1,:], s=100, marker = "d", color = "orange")
 Startpoints = [[{0: 0, 1: 0},{0: 0, 1: 0}],[{0: -.01, 1: 0},{0: .015, 1: 0}], [{0: 0, 1: 0.01}, {0: 0, 1: 0.0075}], [{0: .02, 1: 0.005},{0: .01, 1: .01}]]
 
 for Qs in Startpoints:
-    
+
     print(Qs)
 
     agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=step_size)
@@ -186,7 +186,7 @@ for Qs in Startpoints:
     ## Set up the plot
     ax.plot(probabilities[0,:], probabilities[1,:],color="red",alpha=0.5,linewidth=3)
     ax.scatter(probabilities[0,0], probabilities[1,0],color="red",alpha=0.5)
-
+    
 
 
 plt.show()

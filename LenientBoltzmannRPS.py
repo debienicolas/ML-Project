@@ -13,8 +13,9 @@ import collections
 
 
 ## Set up the parameters
-kappa = 10
-num_train_episodes = int(1000)         # Number of episodes for training the players. (for learning)
+kappa = 1
+num_train_episodes = int(10000)         # Number of episodes for training the players. (for learning)
+step_size = 0.0001
 
 pay_off_tensor = np.array([             # The pay-off matrix
     [[0,-.25,.5],  # Player 1
@@ -55,32 +56,54 @@ game = pyspiel.MatrixGame(
 env = rl_environment.Environment(game)
 num_players = env.num_players
 num_actions = env.action_spec()["num_actions"]
-temperature_schedule = rl_tools.LinearSchedule(0.2, 0.001, num_train_episodes)
+temperature_schedule = rl_tools.LinearSchedule(0.3, 0.01, num_train_episodes)
 
-agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.0001)
+agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=step_size)
           for idx in range(num_players)]
 
 
 
+    ## Get the pay-off tensor
+payoff_tensor = utils.game_payoffs_array(game)
 
-s
-probab = [[[0.75,0.15,1],[0.75,0.15,1]] , [[1,1,1],[1,1,1]] , [[0.1,0.3,1], [0.1,0.3,1]]] #, [[0.15,0.85],[0.85,0.15]],[[0.85,0.15],[0.2,0.80]],[[0.5,0.5],[0.5,0.5]]]
-for prob in probab:
-    print(prob)
+    ## Set up the replicator dynamics
+dyn = dynamics.SinglePopulationDynamics(payoff_tensor, dynamics.replicator)
+    
+    ## Set up the plot
+fig = plt.figure(figsize = (4,4))
+ax = fig.add_subplot(111,projection="3x3")
+ax.set_xlabel("Player 1")
+ax.set_ylabel("Player 2")
+
+    ## Plot the vector field
+ax.quiver(dyn)
+
+paretoPoints = np.zeros(( 3,3))
+paretoPoints[0,:] = [1,0,0]
+paretoPoints[1,:] = [0,0,1]
+paretoPoints[2,:] = [0,1,0]
+ax.scatter(paretoPoints, s=300, color = "green")
+nash = np.zeros(( 1,3))
+nash[0,:] = [1/16,10/16,5/16]
+ax.scatter(nash, s=100, marker = "d", color = "orange")
+Startpoints = [[{0: 0, 1: 0,2:0},{0: 0, 1: 0,2:0}]] #,[{0: 0, 1: .01,2:-.01},{0: 0, 1: .01,2:-.01}],[{0: 0, 1: 0,2:.02},{0: 0, 1: 0,2:.02}]]
+
+for Qs in Startpoints:
+    print(Qs)
 
 
     agents = [BoltzmannQLearner(player_id=idx, num_actions=num_actions,temperature_schedule=temperature_schedule,step_size=0.0001)
           for idx in range(num_players)]
 
 
-    # different Q values 
-    # for i in range(num_players):
-    #     agents[i]._q_values = collections.defaultdict()
+    ## different Q values 
+    for i in range(len(agents)):
+        agents[i]._q_values['[0.0]']  = Qs[i]
 
     ## Set up the buffers for the leniency.
     cache = np.empty((num_players,kappa),dtype=np.int8)
     timesteps = [0]*kappa
-    probabilities = np.zeros((3,num_train_episodes//kappa-1))
+    probabilities = np.zeros((num_train_episodes//kappa-1,3))
 
 
     ## Train the agents
@@ -104,42 +127,20 @@ for prob in probab:
             
 
         # Add the probabilities of the actions to the tensor in order to plot them in the end.
-        probabilities[:,cur_episode//kappa-1] = [agent_output[player_id].probs[0] for player_id in range(num_players)]
+        probabilities[cur_episode//kappa-1,:] = agent_output[0].probs[0]
 
         # Let the players learn from the highest reward.
         for player_id in range(num_players):
             time_step = timesteps[np.argmax(cache[player_id,:])]
             agents[player_id].step(time_step)
+        print(agents[0]._q_values)
+        print(probabilities[cur_episode//kappa-1,:])
         
     ## The learning is done
+    ax.plot(probabilities,color="red",alpha=0.5,linewidth=3)
+    xxx = np.zeros((1,3))
+    xxx[0,:] = probabilities[0]
+    ax.scatter(xxx,color="red",alpha=0.5)
 
 
-    ## Get the pay-off tensor
-    payoff_tensor = utils.game_payoffs_array(game)
-
-    ## Set up the replicator dynamics
-    dyn = dynamics.SinglePopulationDynamics(payoff_tensor, dynamics.replicator)
-    
-    ## Set up the plot
-    fig = plt.figure(figsize = (4,4))
-    ax = fig.add_subplot(111,projection="3x3")
-    ax.set_title("Prisoners Dilemma")
-    ax.set_xlabel("Player 1")
-    ax.set_ylabel("Player 2")
-
-    ## Plot the vector field
-    ax.quiver(dyn)
-    ax.plot(probabilities,color="blue",linewidth=2)
-
-    break
-
-
-paretoPoints = np.zeros(( 3,3))
-paretoPoints[0,:] = [1,0,0]
-paretoPoints[1,:] = [0,0,1]
-paretoPoints[2,:] = [0,1,0]
-ax.scatter(paretoPoints, s=300, color = "green")
-nash = np.zeros(( 1,3))
-nash[0,:] = [1/16,10/16,5/16]
-ax.scatter(nash, s=100, marker = "d", color = "orange")
 plt.show()
