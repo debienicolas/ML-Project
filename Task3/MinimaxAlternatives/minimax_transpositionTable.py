@@ -121,8 +121,8 @@ def main(_):
     n = 20
 
     # The number of rows and columns of the game board
-    num_rows = 3
-    num_cols = 3
+    num_rows = 2
+    num_cols = 2
 
     # A list with the measured execution times
     res = []

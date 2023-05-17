@@ -31,20 +31,20 @@ def _minimax(state, maximizing_player_id, transpTable: dict, num_rows, num_cols,
     key = state.dbn_string()
     # Update the list of scored cells after the last action
     score = updateScore(state,num_rows, num_cols, score, action)
-    # Set boolean to False
-    inTree = False
 
-    symmetries = order(symmetricalStates(key,num_rows, num_cols))
-    if (symmetries[0] in TranspTable.keys()):
-        k = transpTable[symmetries[0]]
+    symmetries = symmetricalStates(key,num_rows, num_cols)
+    symmetries.sort()
+    keyTable = symmetries[0]
+    if (keyTable in transpTable.keys()):
+        k = transpTable[keyTable]
         if (len(score) in k.keys()):
              # Current state and score already found
              return k[len(score)]
     else:
         # Current state not found,
         # so initialise a new dictionary for this state.
-        transpTable[symmetries[0]] = dict()
-        k = transpTable[key] 
+        transpTable[keyTable] = dict()
+        k = transpTable[keyTable] 
 
     player = state.current_player()
     if player == maximizing_player_id:
@@ -200,7 +200,7 @@ def symmetricalStates(state, nrRows, nrCols):
         state7 = rotateRight(rotateRight(state6,nrCols),nrCols)
         res.add(state7)
 
-    return res
+    return list(res)
 
 def rotateRight(state,x):
     newState = ""
@@ -249,8 +249,8 @@ def main(_):
     n = 20
     
     # The number of rows and columns of the game board
-    num_rows = 3
-    num_cols = 3
+    num_rows = 2
+    num_cols = 2
 
     # A list with the measured execution times
     res = []
