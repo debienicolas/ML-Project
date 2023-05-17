@@ -139,7 +139,7 @@ def symmetricalStates(state, nrRows, nrCols):
       nrCols: the number of columns of the game board
 
     Returns:
-      A set with the symmetrical states of the given state (including the given state).
+      A list with the symmetrical states of the given state (including the given state).
     """
 
     # Preprocessing
@@ -151,7 +151,6 @@ def symmetricalStates(state, nrRows, nrCols):
     #           -> size: nrRows
     #           -> each column is a string of length nrCols+1
 
-    #python3 open_spiel/python/examples/mcts.py --game="dots_and_boxes(num_rows=2,num_cols=3)" --player1=human --player2=mcts
     rows = []
     columns = []
     for i in range(nrRows+1):
