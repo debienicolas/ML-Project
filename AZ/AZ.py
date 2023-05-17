@@ -22,7 +22,10 @@ from open_spiel.python.algorithms.alpha_zero import alpha_zero
 from open_spiel.python.algorithms.alpha_zero import model as model_lib
 from open_spiel.python.utils import spawn
 
-flags.DEFINE_string("game", "connect_four", "Name of the game.")
+num_rows = 7
+num_cols = 7
+game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
+flags.DEFINE_string("game", game_string, "Name of the game.")
 flags.DEFINE_integer("uct_c", 2, "UCT's exploration constant.")
 flags.DEFINE_integer("max_simulations", 25, "How many simulations to run.")
 flags.DEFINE_integer("train_batch_size", 8, "Batch size for learning.")
@@ -62,12 +65,8 @@ FLAGS = flags.FLAGS
 
 def main(unused_argv):
 
-  num_rows = 7
-  num_cols = 7
-  game_string = f'dots_and_boxes(num_rows={num_rows},num_cols={num_cols})'
-
   config = alpha_zero.Config(
-      game=game_string,
+      game=FLAGS.game,
       path=FLAGS.path,
       learning_rate=FLAGS.learning_rate,
       weight_decay=FLAGS.weight_decay,
