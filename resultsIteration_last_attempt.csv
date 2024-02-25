@@ -1,0 +1,9 @@
+Learning rate: 8e-05,Epochs: 20,Batch size: 64,Number of channels: 128,L2 coefficient: 0.0001,Temperature threshold: 35
+Learning rate: 8e-05,Epochs: 20,Batch size: 64,Number of channels: 128,L2 coefficient: 0.0001,Temperature threshold: 35
+Iteration,won_random,lost_random,draw_random,winning rate,new_model,won_mcts,lost_mcts,draw_mcts,winning rate
+1,20,0,0,1.0,True,19,1,0,0.95
+Learning rate: 8e-05,Epochs: 20,Batch size: 64,Number of channels: 128,L2 coefficient: 0.0001,Temperature threshold: 35
+Learning rate: 8e-05,Epochs: 20,Batch size: 64,Number of channels: 128,L2 coefficient: 0.0001,Temperature threshold: 35
+Iteration,won_random,lost_random,draw_random,winning rate,new_model,won_mcts,lost_mcts,draw_mcts,winning rate
+2,20,0,0,1.0,True,16,3,1,0.8
+6,12,7,1,0.6,True,9,9,2,0.45
