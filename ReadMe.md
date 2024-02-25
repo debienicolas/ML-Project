@@ -1,4 +1,24 @@
-# Task 4 README
+
+# Multi-agent learning in canonical games and dots-and-boxes
+
+Google deepmind's openspiel package was used for all 3 tasks.
+
+## Task 2
+
+Benckmark games: Biased Rock-Paper-Scissors Game, Dispersion Game, Battle of the Sexes and the Prisoners Dilemma. 
+Learning and dynamics analysis using basic reinforcement learning algorithms on benchmark matrix games.
+
+## Task 3
+
+Solving Dots-and-Boxes using the minimax algorithm.\
+Optimisations made:
+- Transposition tables
+- Exploitation of symmetries
+
+## Task 4 
+
+To build an agent capable of playing the game of dots-and-boxes on larger board size, a graph neural network was used to guide the Monte carlo tree search.
+The approach is heavily based on the AlphaZero framework. 
 
 This is an overview of all the files used for Task 4
 
@@ -10,7 +30,6 @@ Overview of files:
 - GNNEvaluator.py : Extends the openspiel evaluator class used for MCTS.
 - Graph.py : This file is responsible for converting the openspiel game states to graph representation.
 - MCTS.py : Extends openspiel MCTS so it is suitable for self-play.
-
 
 dotsandboxes_agent.py is where our agent capable of playing the tournament is located.
 
